@@ -1,0 +1,496 @@
+.staticinfo {
+  position: relative;
+  
+    overflow: hidden;
+}
+.select2-container .select2-selection--single {
+    
+}
+
+.col-sm-12.form-control-static {
+  padding-left: 0;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #444 !important;
+    line-height: 34ppx !important;
+}
+.select2-container--default .select2-selection--single {
+   background: rgba(255, 255, 255, 0.6) !important;
+    border: none !important;
+    border-radius: 4px !important;
+    height: 34px !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 34px !important;
+    
+}
+
+.logo1 {
+  margin: auto;
+  display: block;
+  margin-top: 25px;
+  border-radius: 5px;
+  margin-bottom: 20px
+}
+.martop{margin-top:45px}
+.plase {
+  font-weight: bold;
+  font-size: 30px;
+ 
+}
+.box.box-solid {
+    margin-top: -10px;
+}
+.col-md-3.col-sm-6.col-xs-12.pull-left.dimarr{margin-top:10px}
+.sizbutt{margin:auto !important;
+         float:none !important;
+         display:block;    
+}
+.table-responsive.mmarg {
+  margin-top: 30px;
+}
+.logo2 {
+  display: block;
+  margin: auto;
+  margin-top: 80px;
+  width: 30%;
+}
+.col-sm-12.form-control-static {
+  color: #357ca5;
+  font-size: 14px !important;
+  font-weight: bold;
+}
+.divmar {
+  margin-top: 28px;
+}
+.form-control.col-sm-12.margi {
+  margin-bottom: -5px;
+}
+.gend {
+  margin-top: 10px;
+}
+.col-sm-2.col-xs-12.form-control-static > b {
+  color: #357ca5;
+}
+.col-sm-2.col-xs-12.form-control-static > b {
+  color: #357ca5 !important;
+  font-size: 18px !important;
+}
+.col-sm-2.col-xs-12.form-control-static.removpad {
+  padding-left: 0;
+}
+.mardive {
+  margin-bottom: 15px;
+  margin-top: 15px;
+}
+.col-md-2.col-sm-12.col-xs-12.form-control-static.edu {
+  font-size: 17px !important;
+  font-weight: bold !important;
+}
+.col-md-3.col-sm-12.col-xs-12.form-control-static.edu {
+  font-size: 17px !important;
+  font-weight: bold !important;
+}
+.box-body {
+  border-bottom: 1px solid #eee;
+}
+.col-md-2.col-md-12.col-xs-12.form-control-static.removpad {
+  color:  #357ca5;
+  padding-left: 0;
+  font-size: 18px;
+}
+.col-xs-12.mardive2 {
+  margin-bottom: 30px;
+  margin-top: 25px;
+}
+.col-md-3.col-sm-6.col-xs-12.edu {
+  color: #357ca5;
+  font-size: 17px !important;
+  font-weight: bold !important;
+  padding-left: 0;
+}
+.inp-mar {
+  margin-top: 20px;
+}
+.col-md-3.col-xs-12.edu{
+  color: #357ca5;
+  font-size: 17px !important;
+  font-weight: bold !important;
+  padding-left: 0;
+}
+.other {
+  clear: both;
+}
+.col-md-3.col-xs-12.edu{
+  color: #357ca5;
+  font-size: 17px !important;
+  font-weight: bold !important;
+  padding-left: 0;
+}
+.control-label.col-md-4.col-sm-12.col-xs-12 {
+  padding-left: 0;
+}
+.control-label.col-md-5.col-sm-12.col-xs-12 {
+  padding-left: 0 !important;
+  text-align: left;
+}
+.col-md-3.col-sm-12.control-label.col-xs-12.pull-left {
+  direction: ltr !important;
+  text-align: left;
+}
+.col-md-3.col-sm-12.control-label.col-xs-12 {
+  text-align: left;
+}
+.form-horizontal.hormar {
+  margin-bottom: 58px;
+}
+.col-md-3.col-sm-4.col-xs-12.control-label {
+  text-align: left;
+}
+.form-group.mothmar {
+  margin-bottom: 35px;
+  margin-top: 30px;
+}
+.col-md-4.col-sm-4.col-xs-12.control-label {
+  padding-left: 0 !important;
+  padding-right: 0;
+  text-align: left;
+}
+.form-group.fathmar {
+  margin-bottom: 35px;
+}
+.col-md-12.col-sm-12.control-label.col-xs-12 {
+  padding-left: 0;
+  text-align: left;
+}
+.form-group.twins {
+  margin-bottom: 25px;
+  margin-top: 20px !important;
+}
+.control-label.col-md-5.col-sm-12.col-xs-12 {
+  color: #357ca5;
+}
+.control-label.pull-left {
+  color: #357ca5;
+
+}
+.col-md-3.col-sm-12.control-label.col-xs-12 {
+  color: #357ca5 !important;
+}
+.col-md-3.col-sm-4.col-xs-12.control-label {
+  color: #357ca5;
+}
+.col-md-4.col-sm-4.col-xs-12.control-label {
+  color: #357ca5;
+}
+.col-md-12.col-sm-12.control-label.col-xs-12 {
+  color: #357ca5;
+}
+.col-md-3.col-sm-6.col-xs-12.control-label {
+  
+  padding-left: 0;
+  text-align: left;
+}
+.control-label.col-md-3.col-sm-12.col-xs-12 {
+  padding-left: 0;
+}
+.form-control.col-md-8.inn {
+  margin-bottom: 20px;
+}
+.control-label.col-md-3 {
+  
+  padding-left: 0 !important;
+  text-align: left;
+}
+.control-label.col-md-2 {
+  
+  
+  text-align: left;
+}
+.col-md-6.col-sm-12.col-xs-12.nopadding {
+  padding-left: 0;
+}
+.addess{color:#357ca5 }
+
+.col-md-3.col-sm-12.col-xs-12.major > h3 {
+  color: #1A2226;
+  font-size: 16px;
+  font-weight: bold;
+}
+.table th {
+  border: 1px solid #ccc !important;
+}
+table {
+  -moz-border-bottom-colors: none;
+  -moz-border-left-colors: none;
+  -moz-border-right-colors: none;
+  -moz-border-top-colors: none;
+  border-bottom: 1px solid #ccc;
+  border-image: none;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+}
+.tablemaj th {
+  border: 1px solid #ccc !important;
+  text-align: center;
+}
+.tablemaj td {
+  border-right: 1px solid #ccc;
+  text-align: center;
+}
+.bg {
+  background: #e5e5e5 none repeat scroll 0 0;
+}
+.row.mar {
+  margin-top: 30px;
+}
+
+.col-md-2.col-sm-12.col-xs-12.radio {
+  margin-top: 20px;
+}
+.col-md-4.col-sm-12.col-xs-12.specify {
+
+  margin-top: 15px;
+}
+.col-md-6.col-sm-12.col-xs-12.history > h3 {
+  margin-top: 18px;
+}
+.col-md-6.col-sm-12.col-xs-12.history > h3 {
+  font-size: 15px;
+  font-weight: bold;
+}
+.row.note {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+.patient > h3 {
+  font-size: 18px;
+  margin-top: 10px;
+  padding-left: 15px;
+}
+.patient2 > h3 {
+  font-size: 18px;
+  margin-top: 10px;
+  
+}
+.table td {
+  border: 1px solid #ccc !important;
+}
+.col-md-3.col-sm-12.col-xs-12.vacc > h3 {
+  font-size: 15px;
+  font-weight: bold;
+}
+.checkbox{margin-bottom:0px !important; }
+.row.last2 {
+  margin-top: 45px;
+}
+.col-md-5.col-sm-12.control-label {
+  font-size: 13px;
+  padding-left: 0;
+}
+.col-md-6.col-sm-12.col-xs-12.last {
+  margin-bottom: 25px;
+}
+.factor > h3 {
+  font-size: 17px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  margin-top: 15px;
+}
+.radio-inline.radiu {
+  padding-left: 50px;
+  margin-left: 0px !important
+}
+.col-md-4.col-sm-2.control-label {
+  font-size: 16px !important;
+  font-weight: bold !important;
+}
+.col-md-4.col-sm-12.col-xs-12.stress > h3 {
+  font-size: 17px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+.col-md-5.col-sm-12.col-xs-12.major > h3 {
+  font-size: 16px;
+  font-weight: bold;
+}
+.nopad {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.col-md-4.col-sm-6.col-xs-12.makmar {
+  margin-top: 15px;
+}
+.row.strow {
+  margin-top: 20px;
+}
+.col-md-4.col-md-6.col-xs-12.disorder {
+  margin-top: 20px;
+}
+@media(max-width: 768px){
+	.age {
+  margin-bottom: 20px !important;
+}
+.form-control.col-sm-12.margi {
+  margin-bottom: 20px;
+}
+.form-control.col-sm-12.margi2 {
+  margin-bottom: 25px;
+}
+.col-md-6.col-sm-12.col-xs-12.nopadding {
+  padding-left: 0;
+}
+.col-md-4.col-sm-12.col-xs-12.stress {
+  margin-top: 26px;
+}
+.col-md-4.col-sm-12.col-xs-12.smallfa {
+  margin-bottom: 20px;
+}
+.col-md-6.col-sm-12.col-xs-12.pull-left.ageinn {
+  margin-top: 25px;
+}
+}
+.form-control.col-sm-12.neww {
+  border-radius: 0 !important;
+  height: 34px !important;
+}
+.collor{
+  color: #357ca5;
+  font-size: 12px !important;
+  font-weight: bold;
+}
+.box.box-solid.borcol {
+  border-top: 3px solid #dd4b39;
+}
+.box.box-solid.borcol2 {
+  border-top: 3px solid #3C8DBC;
+}
+.box.box-solid.borcol3 {
+  border-top: 3px solid #00ACD6;
+}
+.amount {
+  color: #DD4B39;
+  font-size: 16px;
+  font-weight: bold;
+ 
+}
+.sehei {
+  height: 33px;
+}
+.col-md-2.col-sm-6.col-xs-12.pull-left.patintdd {
+  margin-top: 35px;
+}
+.col-md-4.col-sm-6.col-xs-12.hhhh {
+  margin-top: 25px;
+}
+.productnan {
+  
+}
+.category {
+  color: #3C8DBC;
+}
+.productnan.unitt {
+  margin-top: 15px !important;
+}
+.col-md-2.col-sm-6.col-xs-12.pull-left.qutity {
+  margin-top: -10px !important;
+}
+.boddy{
+    background: #155A61; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(#097F7F, #213242); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(#097F7F, #213242); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(#097F7F, #213242); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(#097F7F, #213242); /* Standard syntax */
+   overflow: hidden !important;}
+   .hosnamr {
+  text-align: center;
+  margin-top: 65px;
+  color: white;
+}
+.input-group.usfor {
+  width: 65%;
+  margin: auto;
+  margin-top: 20px;
+  height: 40px;
+}
+.btn.btn-block.btn-primary.loginn {
+  width: 65%;
+  margin: auto;
+  margin-top: 30px;
+  font-weight: bold !important;
+}
+.form-control.emiilh {
+  background: #252A3D;
+  color: white;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  height: 40px
+}
+.usnam{background: #2F7E97 !important;
+       border-color:1px solid #2F7E97 !important;
+       color: white;
+       border-top-left-radius: 5px !important;
+       border-bottom-left-radius:5px !important;
+       padding-left: 25px;
+       padding-right: 25px;
+       font-weight: bold; }
+       .btn.btn-block.btn-primary.loginn {
+  width: 65%;
+  margin: auto;
+  margin-top: 30px;
+  font-weight: bold !important;
+  background: #317F96 !important;
+  border: 1px solid !important;
+}
+.parchase{
+}
+.col-md-2.col-sm-6.col-xs-12.pull-left.addbu {
+  margin-top: 23px;
+  height: 30px;
+}
+.prinnt {
+  background: #eee;
+  padding-bottom: 30px
+}
+.col-md-3.col-sm-12.col-xs-12.prinnt {
+  margin-left: 15px;
+  border: 2px solid #357CA5;
+}
+.hosname {
+  text-align: center;
+  color: #357CA5;
+}
+.prihhg{margin-top: 25px !important}
+.form-group.catdate {
+  margin-top: 9px;
+}
+.row.durgg {
+   
+}
+.input-group.margin {
+  width: 35% !important;
+}
+.btn.btn-info.btn-flat:hover{background:#00ACD6 !important }
+th {
+  color: #357ca5;
+  text-align: center;
+}
+
+@media(max-width: 768px){
+  .limwi {
+  width: 100% !important;
+}
+.input-group.margin {
+  width: 95% !important;
+}
+.input-group.usfor {
+  width: 87% !important;
+}
+.input-group-addon.usnam {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+.btn.btn-block.btn-primary.loginn {
+  width: 87% !important;
+}
+}

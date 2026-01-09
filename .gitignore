@@ -1,0 +1,73 @@
+# Laravel 10 standard .gitignore
+
+# Node modules
+/node_modules
+
+# Composer vendor
+/vendor
+
+# Laravel specific files
+.env
+.env.backup
+.env.testing
+.phpunit.result.cache
+/storage/*.key
+/storage/app/public
+/storage/framework/cache/data
+/storage/framework/sessions
+/storage/framework/views
+/storage/logs
+
+# IDEs and editors
+/.idea
+*.sublime-project
+*.sublime-workspace
+.vscode
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Laravel Sail
+docker-compose.override.yml
+
+# NPM/Yarn logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# PHPUnit
+coverage/
+
+# Laravel Telescope (if used)
+storage/telescope
+
+# Ignoring backups
+*.bak
+*.sql
+*.sqlite
+
+# Laravel Mix
+/public/hot
+/public/storage
+/public/mix-manifest.json
+/public/js/*.map
+/public/css/*.map
+/public/attachments
+/public/build
+/public/files
+/public/temp
+/public/uploads
+
+# Cache files
+*.cache
+
+# Logs
+*.log
+
+# Lock files (optional – if you regenerate them per environment)
+# composer.lock
+# package-lock.json
+# pnpm-lock.yaml
+# yarn.lock

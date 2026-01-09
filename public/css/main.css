@@ -1,0 +1,102 @@
+@import url(https://fonts.googleapis.com/earlyaccess/droidarabickufi.css);
+
+
+
+body , html { position:relative;
+}
+body {font-family: 'Droid Arabic Kufi', sans-serif; }
+
+
+
+
+
+
+.control-label { float:right}
+.nav .nav-list {
+
+  padding-right: 15px;
+  padding-left: 15px;
+    padding-bottom: 15px;
+
+  margin-bottom: 10px;
+  border-right:2px solid #C7C3C3;
+    border-bottom:2px solid #C7C3C3;
+
+}
+.well-lg {
+    margin-right:-20px;
+
+}
+
+.back{
+	 background-color:#f5f5f5 ;
+	 padding:6px ;
+	 cursor:pointer;
+	 border-radius:12px;
+	 border:1px solid #58C5C0
+}
+.back:hover {  background:#D9D4D4 ; border:none}
+table { margin-top:50px}
+table th { text-align:center;}
+table td { text-align:center;}
+
+.modal .modal-dialog .modal-content{ background-color:#f5f5f5; }
+.modal-header{ background-color:#3491E8; border:none; color:#fff; text-align:center}
+.modal-footer{ background-color:#3491E8; border:none; color:#fff; text-align:center}
+
+
+ .account { position:fixed; left:30px; right:45%; top:65px;}
+    .account .panel-heading {
+        text-align:center;
+        background-color: #e3f2f7;
+        color:#808080;
+
+    }
+.panel-heading{  color:#fff; text-align:center; }
+.panel-footer{   color:#fff; text-align:center; background-color:#4a5f69}
+
+.panel-body{ background-color:#f5f5f5;  }
+
+
+
+.btn-primary { padding:10px 30px;}
+
+.font{ font-size:20px; 	 cursor:pointer; color:#58C5C0
+}
+.font:hover{ color:#0880F0;
+}
+
+.operation{ float:left; }
+.operation-2{ float:left; margin-left:-14px}
+.operation-3{ float:left;  margin-left:-28px;}
+
+.btn-color { background-color:#58C5C0; border:none}
+.btn-color:hover { background-color:#13F7EC}
+
+
+
+
+@media (max-width: 1200px){
+
+	.nav .nav-list { font-size:10px }
+	.nav-header{ font-size:11px}
+	.font{font-size:16px;}
+}
+
+@media (max-width: 992px){
+
+	.nav .nav-list { font-size:14px }
+	.nav-header{ font-size:14px}
+	.font{font-size:19px;}
+
+	.panel { position:static}
+}
+
+@media (max-width: 500px){
+
+	table ,tr , th ,td { font-size:6px;  }
+
+}
+
+
+

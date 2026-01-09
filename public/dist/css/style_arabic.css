@@ -1,0 +1,303 @@
+
+
+@import url(//fonts.googleapis.com/earlyaccess/droidarabickufi.css);
+
+
+body {
+    font-family: 'Droid Arabic Kufi', sans-serif;
+
+}
+#sendData {
+    text-align:center;
+  
+    color:#fff;
+    padding: 10px 20px 10px 20px;
+    
+}
+.but {
+ 
+    margin: 0 auto;
+}
+
+
+#addIntable {
+    color:#fff;
+    margin-top:12px;
+    padding: 10px 20px 10px 20px;
+    border:none;
+    
+
+}
+#sendDates {
+    color:#fff;
+    margin-top:-8px;
+padding: 10px 20px 10px 20px;
+border:none;
+
+}
+#TransferDates {
+    color:#fff;
+    margin-top:-40px;
+    border:none;
+   padding: 10px 20px 10px 20px;
+    
+}
+
+
+
+
+
+.show1{
+    color:#fff;
+    padding:10px;
+    border:none;
+}
+
+
+.sizbutt {
+    padding:10px;
+     color:#fff
+}
+
+
+
+.bt{
+    margin-top:20px;
+
+}
+
+.panel {
+    border-color:#41cac0;
+    margin-top:20px;
+}
+
+
+.panel > .panel-heading {
+         background-color:#b153fa;
+             color:#fff;
+             border:none;
+             width:100%;
+
+}
+    .body-sp {
+        background-color: #ecf3f6;
+       
+         margin:0px -15px -20px -15px;
+         padding:20px;
+        
+         
+
+    }
+.heading {
+ 
+     text-align:center;
+     padding:4px;
+     margin:0px -15px;
+     color:#000;
+
+
+}
+.heading h4 {
+   
+     margin-top:5px;
+     margin-right:20px;
+
+
+}
+
+
+
+
+
+.spe {
+
+     margin-top:-10px;
+}
+.spe2 {
+    margin-top:30px;
+}
+
+.s-panel {
+    margin-left:20px;
+    
+}
+.back {
+        background-color:#e6eeef
+
+}
+
+
+
+.content-wrapper,
+.right-side {
+   
+    background-color: #eee;
+  
+}
+
+
+
+
+.skin-blue .main-header .navbar .sidebar-toggle:hover {
+
+  color: #000;
+  background-color: #e6eeef;
+}
+
+.skin-blue .main-header .logo {
+  color: #ffffff;
+  border-bottom: 0 solid transparent;
+}
+    .skin-blue .main-header .logo:hover {
+         background-color: #e6eeef;
+         color: #000;
+    }
+
+
+
+
+.skin-blue .sidebar-menu > li.header {
+  color: #000;
+  font-weight:600;
+}
+
+
+.skin-blue .sidebar-menu > li:hover > a
+{
+  color: #fff;
+  
+    padding: 10px 0;
+    
+}
+
+
+
+.skin-blue .sidebar-form input[type="text"],
+.skin-blue .sidebar-form .btn {
+
+  background-color: #1d4a5f;
+  border: 1px solid transparent;
+ 
+}
+
+
+input[type="text"] , input[type="number"] , textarea , input[type="email"] , input[type="password"] 
+ {  /*color:#fff ;*/  border:none;  
+
+    box-shadow:3px 3px 14px 1px rgb(186, 220, 236)
+
+}
+    input[type="number"]:disabled 
+{
+        color:#000;
+    }
+
+
+
+
+
+
+    input[type="text"]:focus, input[type="number"]:focus , textarea:focus, input[type="email"]:focus , input[type="password"]:focus{
+        border:1px solid #41cac0;
+        background-color:#41cac0;
+        color:#000
+
+    }
+
+.style-select select {
+      /*color:#fff;*/ 
+      border:none;
+
+}
+.style-select select:focus {
+     background-color:#41cac0; color:#000
+}
+.select2-container--default .select2-selection--single {
+
+ border:none;
+ color:#fff
+ 
+}
+
+
+
+
+ .select2-dropdown {
+ 
+  color:#000;
+   border:none;
+
+}
+
+
+
+input::-webkit-input-placeholder {
+color: #000 !important;
+}
+ 
+input:-moz-placeholder { /* Firefox 18- */
+color: #000 !important;  
+}
+ 
+input::-moz-placeholder {  /* Firefox 19+ */
+color: #000 !important;  
+}
+ 
+input:-ms-input-placeholder {  
+color: #000 !important;  
+}
+
+
+
+
+.box-body {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
+  padding: 10px;
+background: #fff;
+box-shadow:0px 3px 8px 0px rgba(0, 0, 0 , .25);
+
+
+
+}
+
+
+
+
+
+
+
+
+#addIntable , #sendDates , .show1 , .sizbutt , .heading {
+    background-color: #5dbeeb;
+}
+
+.fa-search , .fa-calendar , .collor ,.h-collor ,.table , tr , th {
+    color:#05577d;
+}
+.fa-search {
+    color:#fff;
+}
+
+
+
+
+.drop {
+    border:none;
+    color:#000
+}
+
+ input[type="text"],  input[type="email"], input[type="password"],.drop ,
+ input[type="number"],  textarea,  .style-select select,
+ .select2-container--default .select2-selection--single ,  .select2-dropdown  {
+     background: rgba(255, 255, 255, 0.6);
+box-shadow:0px 3px 8px 0px rgba(0, 0, 0 , .25);
+
+}
+
+
+
+
+

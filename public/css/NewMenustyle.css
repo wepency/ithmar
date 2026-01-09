@@ -1,0 +1,67 @@
+﻿
+i.fa.fa-angle-left.pull-right {
+    display: none;
+}
+.mtree-demo {
+    overflow-y: scroll;
+    height: 87%;
+}
+ul.mtree {
+  opacity: 1; 
+  margin-left: 0; 
+  padding: 1.2em; 
+ background: #232222; 
+ color:#940882
+}
+  ul.mtree ul {
+    margin-left: 1em; 
+  }
+  
+ 
+ ul.mtree li {
+    list-style: none; 
+  }
+  
+  
+ ul.mtree a {
+    @extend %mtree-transition;
+    display: block;
+  }
+  
+
+ 
+  
+ 
+  
+ 
+ ul.mtree li.mtree-active  > a{
+     background: #CCC; 
+  }
+
+
+
+%mtree-transition {
+  -webkit-transition: all 300ms ease-out;
+  -moz-transition: all 300ms ease-out;
+  -ms-transition: all 300ms ease-out;
+  -o-transition: all 300ms ease-out;
+  transition: all 300ms ease-out;
+}
+
+
+
+ ul.mtree ul li { font-size: .9em; }
+ ul.mtree li.mtree-node > a:after {content: '›'; margin-left:.5em; font-weight: normal; }
+ ul.mtree li.mtree-node > a { font-weight: bold; text-transform: upperCase;}
+ ul.mtree  li {border-bottom: 1px solid #DDD;}
+ul.mtree   li:last-child {border-bottom: none;}
+ul.mtree  li:last-child > a {border: none; }
+ul.mtree   li.mtree-open > a { background: #1c2429; }
+ul.mtree  li > a:hover { background: #3c8dbca1;}
+ul.mtree  li.mtree-active > a { background: #525050; color: #FFF; }
+  
+ul.mtree  a { padding: 7px 0px 7px 5px ;  color:#fff }
+ ul.mtree li li > a { padding-left:20px ; }
+ul.mtree  li li li > a { padding-left: 30px ; }
+ul.mtree  li li li li > a { padding-left: 40px ; }
+ul.mtree  li li li li li > a { padding-left: 50px; } 

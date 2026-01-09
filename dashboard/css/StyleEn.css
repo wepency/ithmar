@@ -1,0 +1,8 @@
+﻿body {
+direction:ltr !important;
+}
+input[type="text"],input[type="email"], input[type="password"],
+ input[type="number"],  textarea,  .style-select select,
+ .select2-container--default .select2-selection--single ,  .select2-dropdown {
+   direction:ltr !important;
+}

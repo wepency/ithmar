@@ -1,0 +1,55 @@
+﻿
+
+ 
+
+      .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+
+
+           background-color: #f172ba;
+    color: #fff;
+}
+      .tabs-right > .nav-tabs > li > a:hover{
+          background-color: #f172ba;
+    color: #fff;
+
+      }
+      .nav-tabs {
+
+          background: none;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.08);
+}
+   .nav-tabs li {
+       margin-bottom: -3px
+
+}
+
+     .k-webkit .k-rtl .k-dropdown-wrap .k-input, .k-webkit .k-rtl .k-numeric-wrap .k-input {
+     margin-right: 0px;
+
+}
+     
+      .table > thead > tr > th { font-size: 11px}
+          .k-autocomplete.k-state-default, .k-dropdown-wrap.k-state-default, .k-numeric-wrap.k-state-default, .k-picker-wrap.k-state-default , .k-state-disabled {     
+    font-size: 11px;}
+      
+      .k-checkbox-label {
+ 
+        line-height:11px;
+          font-size: 10px;
+    
+}
+
+      .k-radio-label:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    border-style: solid;
+}
+    .k-reset {
+        font-size: 11px;
+    }
+
+
