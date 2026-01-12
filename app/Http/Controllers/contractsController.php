@@ -27,10 +27,11 @@ class contractsController extends Controller
     public function __construct()
     {
         $this->middleware('auth')->except('check', 'getByToken', 'getSingleContract', 'verify', 'payValidate');
-//        $this->middleware('FrontEnd');
+        //        $this->middleware('FrontEnd');
     }
 
-    public function getContracts(){
+    public function getContracts()
+    {
         $page_title = 'العقود';
 
         $activeCount = Contract::where('user_id', auth()->id())->active()->count();
@@ -39,13 +40,13 @@ class contractsController extends Controller
 
         $contracts = Contract::where('user_id', auth()->id());
 
-        if (request()->type === 'active'){
+        if (request()->type === 'active') {
             $contracts = $contracts->active();
-        }else if(request()->type === 'signed') {
+        } else if (request()->type === 'signed') {
             $contracts = $contracts->signed();
         }
 
-        if (request()->sorting != ''){
+        if (request()->sorting != '') {
             $contracts = $contracts->where('payment_type', request()->sorting);
         }
 
@@ -54,16 +55,17 @@ class contractsController extends Controller
         return view('contracts', compact('page_title', 'contracts', 'activeCount', 'signedCount', 'allCount'));
     }
 
-    public function add(){
+    public function add()
+    {
         $page_title = 'إضافة عقد جديد';
 
-        $sectors = Sector::whereHas('unit', function (Builder $q){
+        $sectors = Sector::whereHas('unit', function (Builder $q) {
             $q->where('user_id', auth()->id())->where('status', 1);
         })->orderBy('id', 'DESC')->get();
 
         $refused = Unit::where('status', 2)->where('user_id', auth()->id())->get();
 
-        $expired = Unit::where(function ($q){
+        $expired = Unit::where(function ($q) {
             $q->where('valid_to', '')->orWhere('valid_to', '<', Carbon::today());
         })->where('type', 'investor')->where('user_id', auth()->id())->get();
 
@@ -72,13 +74,13 @@ class contractsController extends Controller
 
     private function filter($q)
     {
-        if(request('beach'))
-        {
+        if (request('beach')) {
             return $q->where('beach_id', request('beach'))->get();
         }
     }
 
-    public function saveNew(Request $request){
+    public function saveNew(Request $request)
+    {
         $prices = Setting::first();
 
         $request->validate([
@@ -100,8 +102,9 @@ class contractsController extends Controller
             'car' => 'required|array'
         ]);
 
-        return DB::transaction(function () use ($request, $prices){
+        return DB::transaction(function () use ($request, $prices) {
             $contract = new Contract;
+            $unit = Unit::findOrFail($request->unit_id);
             $code = time();
 
             $contract->unit_id = $request->unit_id;
@@ -113,8 +116,8 @@ class contractsController extends Controller
             $contract->with_tenant_name = $request->with_tenant_name;
             $contract->with_tenant_name_code = $request->with_tenant_name_code;
             $contract->birth_date = Carbon::parse($request->birth_date)->format('Y-m-d');
-            $contract->from = Carbon::parse($request->from.' 15:00:00')->format('Y-m-d H:i:s');
-            $contract->to = Carbon::parse($request->to.' 15:00:00')->format('Y-m-d H:i:s');
+            $contract->from = Carbon::parse($request->from . ' 15:00:00')->format('Y-m-d H:i:s');
+            $contract->to = Carbon::parse($request->to . ' 15:00:00')->format('Y-m-d H:i:s');
 
             $contract->rent_value = $request->rent_value;
             $contract->car_type1 = $request->car_type1;
@@ -122,12 +125,22 @@ class contractsController extends Controller
 
             $contract->user_id = auth()->id();
 
-            $contract->car_type2 =$request->car_type2;
+            $contract->car_type2 = $request->car_type2;
             $contract->car_serial2 = $request->car_serial2;
 
-            $contract->price = $prices->price_before_vat;
-            $contract->total = $prices->price_after_vat;
-            $contract->vat = vat_without_percent($prices->price_before_vat, $prices->price_after_vat);
+            // Default values from settings
+            $price_before = $prices->price_before_vat;
+            $price_after = $prices->price_after_vat;
+
+            $calculateFinalPrices = getContractPriceAndTotal($unit, $price_before, $price_after);
+
+            $final_price = $calculateFinalPrices['price'];
+            $final_vat = $calculateFinalPrices['vat'];
+            $final_total = $calculateFinalPrices['total'];
+
+            $contract->price = $final_price;
+            $contract->total = $final_total;
+            $contract->vat = $final_vat;
 
             $contract->code = $code;
             $contract->token = time() + rand(1111, 9999);
@@ -139,30 +152,30 @@ class contractsController extends Controller
             $contract->with_tenant_nationality = $request->with_tenant_nationality;
             $contract->insurance_value = $request->insurance_value;
 
-            if (!$this->checkAvailability($contract->from, $contract->to, $request->unit_id)){
+            if (!$this->checkAvailability($contract->from, $contract->to, $request->unit_id)) {
                 return  redirect()->back()
                     ->withInput($request->input())
                     ->with('error', 'هناك حجز أخر في نفس الفتره برجاء المحاولة مجددا.');
             }
 
-            if ($request->rental_barcode_image != ''){
+            if ($request->rental_barcode_image != '') {
                 $file = $request->rental_barcode_image;
                 $file_array = explode('/', $file);
                 $filename = end($file_array);
 
-                if (file_exists(public_path('temp/'.$filename))){
-                    File::move(public_path('temp/'.$filename), public_path('uploads/'.$filename));
+                if (file_exists(public_path('temp/' . $filename))) {
+                    File::move(public_path('temp/' . $filename), public_path('uploads/' . $filename));
                     $contract->attachment_1 = $filename;
                 }
             }
 
-            if ($request->with_rental_barcode_image != ''){
+            if ($request->with_rental_barcode_image != '') {
                 $file = $request->with_rental_barcode_image;
                 $file_array = explode('/', $file);
                 $filename = end($file_array);
 
-                if (file_exists(public_path('temp/'.$filename))){
-                    File::move(public_path('temp/'.$filename), public_path('uploads/'.$filename));
+                if (file_exists(public_path('temp/' . $filename))) {
+                    File::move(public_path('temp/' . $filename), public_path('uploads/' . $filename));
                     $contract->attachment_2 = $filename;
                 }
             }
@@ -172,8 +185,8 @@ class contractsController extends Controller
             $carArray = [];
             $i = 0;
 
-            foreach ($request->car as $c){
-                if ($c['type'] != '' && $c['serial'] != ''){
+            foreach ($request->car as $c) {
+                if ($c['type'] != '' && $c['serial'] != '') {
                     $carArray[$i]['car_type'] = $c['type'];
                     $carArray[$i]['car_serial'] = $c['serial'];
                     $carArray[$i]['contract_id'] = $contract->id;
@@ -193,11 +206,13 @@ class contractsController extends Controller
                 'updated_at' => ''
             ]);
 
-            return redirect()->to(url('contract/'.$code.'/verifyPhone'))->with('message', 'تم حفظ العقد بنجاح و بإنتظار التفعيل.');
+            return redirect()->to(url('contract/' . $code . '/verifyPhone'))->with('message', 'تم حفظ العقد بنجاح و بإنتظار التفعيل.');
         });
     }
 
-    public function save(Request $request){
+    public function save(Request $request)
+    {
+
         $request->validate([
             'sector_id' => 'required',
             'beach_id' => 'required',
@@ -222,10 +237,17 @@ class contractsController extends Controller
         return DB::transaction(function () use ($request) {
 
             $settings = Setting::first();
+            $unit = Unit::findOrFail($request->unit_id);
 
+            // Default values from settings
             $price_before = $settings->price_before_vat;
             $price_after = $settings->price_after_vat;
-            $vat = vat_without_percent($price_before, $price_after);
+
+            $calculateFinalPrices = getContractPriceAndTotal($unit, $price_before, $price_after);
+
+            $final_price = $calculateFinalPrices['price'];
+            $final_vat = $calculateFinalPrices['vat'];
+            $final_total = $calculateFinalPrices['total'];
 
             $data = [
                 'unit_id' => $request->unit_id,
@@ -253,9 +275,9 @@ class contractsController extends Controller
                 'status' => 0,
                 'is_accepted' => 1,
 
-                'price' => $price_before,
-                'vat' => $vat,
-                'total' => $price_after,
+                'price' => $final_price,
+                'vat' => $final_vat,
+                'total' => $final_total,
 
                 'payment_type' => 'phone',
                 'phonenumber' => $request->phonenumber,
@@ -321,10 +343,10 @@ class contractsController extends Controller
             $contract->services_total = $services_total;
             $contract->save();
 
-            $users = User::where('role' ,'admin')->get();
+            $users = User::where('role', 'admin')->get();
 
-//            foreach ($users as $user)
-//                @$user->notify(new ContractNotifications($contract));
+            //            foreach ($users as $user)
+            //                @$user->notify(new ContractNotifications($contract));
 
             // Add the event to history
             History::create([
@@ -336,59 +358,63 @@ class contractsController extends Controller
                 'updated_at' => ''
             ]);
 
-            return redirect()->to(url('contract/'.contractMix($contract).'/verifyPhone'))->with('message', 'تم حفظ العقد بنجاح و بإنتظار التفعيل.');
+            return redirect()->to(url('contract/' . contractMix($contract) . '/verifyPhone'))->with('message', 'تم حفظ العقد بنجاح و بإنتظار التفعيل.');
         });
     }
 
-    public function checkAvailability($from, $to, $unit){
+    public function checkAvailability($from, $to, $unit)
+    {
 
         $from_plus = Carbon::parse($from)->addDay()->format('Y-m-d H:i:s');
         $to_sub = Carbon::parse($to)->subDay()->format('Y-m-d H:i:s');
 
-//        return $from_plus;
-        $contract = Contract::where(function ($q) use ($from, $to, $to_sub, $from_plus){
+        //        return $from_plus;
+        $contract = Contract::where(function ($q) use ($from, $to, $to_sub, $from_plus) {
             $q->whereBetween('from', [$from, $to_sub])
                 ->orWhereBetween('to', [$from_plus, $to])
-                ->orWhere(function ($query) use ($from, $to){
+                ->orWhere(function ($query) use ($from, $to) {
                     $query->where('from', '<=', $from)
                         ->where('to', '>=', $to)->get();
                 })
                 ->get();
         })->where('unit_id', $unit)->first();
 
-//        return $contract;
+        //        return $contract;
         return is_null($contract);
     }
 
-//    public function checkAvailability($contract){
-//        $contract = $contract->whereDate('from', )->whereDate('to', )->get();
-//        return $contract;
-//    }
+    //    public function checkAvailability($contract){
+    //        $contract = $contract->whereDate('from', )->whereDate('to', )->get();
+    //        return $contract;
+    //    }
 
     public function redirect()
     {
         return view('MyFatoorah::standard-redirect');
     }
 
-    public function getSingleContract($code){
+    public function getSingleContract($code)
+    {
         $contract = Contract::with('unit', 'beach', 'sector', 'user', 'cars', 'services')->where('code', $code)->first();
         return ContractsResource::make($contract);
     }
 
-    public function verify($code){
+    public function verify($code)
+    {
         $page_title = 'تأكيد رقم جوال المستأجر';
         $code_decode = contractMixDecode($code);
 
-//        return $code_decode;
+        //        return $code_decode;
         $contract = Contract::where('code', $code_decode)->whereNull('is_cancelled')->where('status', 0)->firstOrFail();
 
         if (!is_null($contract->phonenumber))
-            return redirect()->to(url('/contract/'.$code.'/pay-validate'));
+            return redirect()->to(url('/contract/' . $code . '/pay-validate'));
 
         return view('contracts.verify', compact('page_title', 'contract'));
     }
 
-    public function verifyPost($code){
+    public function verifyPost($code)
+    {
         $contract = Contract::where('code', $code)->first();
 
         if (is_null($contract))
@@ -400,48 +426,51 @@ class contractsController extends Controller
         return redirect()->to('');
     }
 
-    public function payValidate($code){
+    public function payValidate($code)
+    {
         $code_decode = contractMixDecode($code);
 
-//        return $code_decode;
+        //        return $code_decode;
 
-//        return dd($contract);
+        //        return dd($contract);
 
         $contract = Contract::where('code', $code_decode)
-//                        ->where('user_id', auth()->id())
-                        ->whereDate('to', '>=', Carbon::now())
-                        ->whereNull('is_cancelled')
-                        ->first();
+            //                        ->where('user_id', auth()->id())
+            ->whereDate('to', '>=', Carbon::now())
+            ->whereNull('is_cancelled')
+            ->first();
 
-        if (is_null($contract->phonenumber)){
-            return redirect()->to(url('contract/'.$code.'/verifyPhone'));
+        if (is_null($contract->phonenumber)) {
+            return redirect()->to(url('contract/' . $code . '/verifyPhone'));
         }
 
         return view('contracts.pay-step', compact('contract'));
     }
 
-//    public function payment($id, $code){
-//        $contract = Contract::where('code', $code)->first();
-//
-//        if (is_null($contract))
-//            abort(404);
-//
-//        return Redirect::to(route('myfatoorah.redirect' , ['contract_id' => $contract->id]));
-//    }
+    //    public function payment($id, $code){
+    //        $contract = Contract::where('code', $code)->first();
+    //
+    //        if (is_null($contract))
+    //            abort(404);
+    //
+    //        return Redirect::to(route('myfatoorah.redirect' , ['contract_id' => $contract->id]));
+    //    }
 
-    public function show($code){
+    public function show($code)
+    {
         $contract = Contract::with('unit', 'beach', 'sector', 'user')->where('code', $code)->first();
 
         if (is_null($contract))
             abort(404);
 
         if (!$contract->status)
-            return redirect()->to('contract/'.contractMix($contract).'/draft-show');
+            return redirect()->to('contract/' . contractMix($contract) . '/draft-show');
 
         return view('contracts.show');
     }
 
-    public function check($code){
+    public function check($code)
+    {
         $vars = qr_code_decode($code);
 
         $code = isset($vars['code']) ? $vars['code'] : '';
@@ -456,7 +485,8 @@ class contractsController extends Controller
         return view('contracts.check', compact('contract', 'page_title'));
     }
 
-    public function edit($code){
+    public function edit($code)
+    {
         $contract = Contract::where('code', $code)->where('is_accepted', 1)->first();
 
         if (is_null($contract) && !is_valid($contract))
@@ -466,11 +496,12 @@ class contractsController extends Controller
         return view('contracts.edit', compact('contract'));
     }
 
-    public function update(Request $request, $code){
+    public function update(Request $request, $code)
+    {
         $contract = Contract::where('code', $code)->where('status', 1)->first();
 
-//        $contract->from = Carbon::parse($request->from.' 16:00:00')->format('Y-m-d H:i:s');
-//        $contract->to = Carbon::parse($request->to.' 16:00:00')->format('Y-m-d H:i:s');
+        //        $contract->from = Carbon::parse($request->from.' 16:00:00')->format('Y-m-d H:i:s');
+        //        $contract->to = Carbon::parse($request->to.' 16:00:00')->format('Y-m-d H:i:s');
 
         History::create([
             'hismodel_id' => $contract->id,
@@ -482,13 +513,14 @@ class contractsController extends Controller
         ]);
 
         if ($contract->save()) {
-            return redirect()->to(investor_url('contract/'.$contract->code));
+            return redirect()->to(investor_url('contract/' . $contract->code));
         }
 
         return redirect()->back()->with('error', 'هناك خطا في تعديل بيانات العقد.');
     }
 
-    public function getByToken($code, $token){
+    public function getByToken($code, $token)
+    {
         $contract = Contract::where('code', $code)->where('token', $token)->first();
 
         if (is_null($contract))
@@ -497,15 +529,16 @@ class contractsController extends Controller
         $check_reservation = $contract->reservation && $contract->reservation->status <= 2;
 
         if (!$contract->status && $check_reservation)
-            return redirect()->to('contract/draft/'.$code.'/'.$token);
+            return redirect()->to('contract/draft/' . $code . '/' . $token);
 
         if ($check_reservation)
-            return redirect()->to('contract/'.contractMix($contract).'/pay-validate');
+            return redirect()->to('contract/' . contractMix($contract) . '/pay-validate');
 
         return view('contracts.show-guest', compact('contract'));
     }
 
-    public function cancelContract($code){
+    public function cancelContract($code)
+    {
         $contract = Contract::where('code', $code)->first();
 
         $contract->update([
@@ -523,7 +556,7 @@ class contractsController extends Controller
         if (!is_null($carId)) {
             $car = Car::findOrFail($carId);
 
-            if($car->is_edited)
+            if ($car->is_edited)
                 abort(403);
         }
 
@@ -541,7 +574,8 @@ class contractsController extends Controller
         ]);
     }
 
-    public function verifyCode(){
+    public function verifyCode()
+    {
         $page_title = '';
         return view('contracts.verify-code', compact('page_title'));
     }

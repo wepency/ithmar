@@ -12,7 +12,10 @@ class Sector extends Model
     protected $fillable = [
         'sector_name',
         'user_id',
-        'percentage'
+        'percentage',
+        'price',
+        'vat',
+        'total'
     ];
 
     public function beach(){

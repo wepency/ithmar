@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\History;
 use App\Models\Sector;
+use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -31,9 +32,12 @@ class SectorsController extends Controller
           $users = [];
         }
 
+        $settings = Setting::first();
+
         return view('admin.sector.index',[
           'rows' => $rows,
           'users' => $users,
+          'settings' => $settings
         ]);
     }
 
@@ -45,7 +49,10 @@ class SectorsController extends Controller
           'password' => 'required',
           'phonenumber' => 'required|unique:users',
           'email' => 'required|unique:users',
-          'percentage' => 'required'
+          'percentage' => 'required',
+          'price' => 'nullable|numeric',
+          'vat' => 'nullable|numeric',
+          'total' => 'nullable|numeric'
         ]);
 
         return DB::transaction(function () use ($request, $data){
@@ -94,11 +101,13 @@ class SectorsController extends Controller
             Rule::unique('users')->ignore($user->id)
         ],
         'email' => [
-            Rule::unique('users')->ignore($user->id)
-        ],
-        'percentage' => 'required'
-      ]);
-
+                    Rule::unique('users')->ignore($user->id)
+                  ],
+                  'percentage' => 'required',
+                  'price' => 'nullable|numeric',
+                  'vat' => 'nullable|numeric',
+                  'total' => 'nullable|numeric'
+                ]);
       $user = User::findOrFail($sector->user_id);
 
       $user->name = $request->name;

@@ -22,7 +22,10 @@ class Unit extends Model
         'valid_to',
         'renewed',
         'count',
-        'note'
+        'note',
+        'price',
+        'vat',
+        'total'
     ];
 
     public function beach(){

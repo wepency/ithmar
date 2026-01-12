@@ -199,7 +199,7 @@ class ContractsController extends Controller
     // Store & Update in one function
     protected function AddOrCreate($contract, $request){
 
-        $unit = Unit::with('user', 'user.services')->findOrFail($request->unit_id);
+        $unit = Unit::with('user', 'user.services', 'sector')->findOrFail($request->unit_id);
 
         $settings = Setting::first();
 
@@ -217,9 +217,15 @@ class ContractsController extends Controller
             $data['attachment_2'] = $filename_2;
         }
 
+        // Default values from settings
         $price_before = $settings->price_before_vat;
         $price_after = $settings->price_after_vat;
-        $vat = vat_without_percent($price_before, $price_after);
+
+        $calculateFinalPrices = getContractPriceAndTotal($unit, $price_before, $price_after);
+
+        $final_price = $calculateFinalPrices['price'];
+        $final_vat = $calculateFinalPrices['vat'];
+        $final_total = $calculateFinalPrices['total'];
 
         // Contracts
         $data['unit_id'] = $request->unit_id;
@@ -249,9 +255,9 @@ class ContractsController extends Controller
             $data['code']  = get_code();
             $data['token'] = time() + rand(1111,9999);
 
-            $data['price'] = $price_before;
-            $data['vat']   = $vat;
-            $data['total'] = $price_after;
+            $data['price'] = $final_price;
+            $data['vat']   = $final_vat;
+            $data['total'] = $final_total;
 
             $data['status'] = 0;
             $data['is_accepted'] = 1;

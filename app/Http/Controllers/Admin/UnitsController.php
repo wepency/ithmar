@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Beach;
+use App\Models\Setting;
 use App\Models\Unit;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -47,8 +48,10 @@ class UnitsController extends Controller
         $beaches = Beach::select('id', 'beach', 'sector_id')->with('sector:id,sector_name')->orderBy('sector_id', 'ASC')->get();
 
         $rows = $rows->with('attachments')->where('status', '>', 0)->paginate(10);
+        
+        $settings = Setting::first();
 
-        return view('admin.units.all', compact('rows', 'beaches'));
+        return view('admin.units.all', compact('rows', 'beaches', 'settings'));
     }
 
     public function store(Request $request)
@@ -68,6 +71,9 @@ class UnitsController extends Controller
         $unit = Unit::findOrFail($id);
 
         $unit->valid_to = Carbon::parse(request()->valid_to)->format('Y-m-d');
+        $unit->price = $request->price ?? 0;
+        $unit->vat = $request->vat ?? 0;
+        $unit->total = $request->total ?? 0;
 
         if ($unit->save()){
             return redirect()->back()->withSuccess('تمت العملية بنجاح.');

@@ -3,6 +3,7 @@
 use App\Models\BookingDate;
 use App\Models\Contract;
 use App\Models\Token;
+use App\Models\Unit;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Pusher\Pusher;
@@ -1086,4 +1087,43 @@ function get_api_contract_status_badge($contract){
 
 function checkIfThursday() : bool{
     return (new Carbon())->dayOfWeek == Carbon::THURSDAY;
+}
+
+
+/**
+ * Get the price and total of a contract based on the Unit, general price before and after.
+ * If the Unit has a price, it will override the general price.
+ * If the Unit's sector has a price, it will override the general price.
+ * If neither the Unit nor the Unit's sector has a price, the general price will be used.
+ *
+ * @param Unit $unit
+ * @param float $generalPriceBefore
+ * @param float $generalPriceAfter
+ * @return array
+ */
+function getContractPriceAndTotal(Unit $unit, $generalPriceBefore, $generalPriceAfter): array
+{
+    // Default values from settings
+    $final_price = $generalPriceBefore;
+    $final_total = $generalPriceAfter;
+    $final_vat = vat_without_percent($generalPriceBefore, $generalPriceAfter);
+    
+    // Override with Unit prices if available
+    if ($unit->price > 0) {
+        $final_price = $unit->price;
+        $final_vat = $unit->vat;
+        $final_total = $unit->total;
+    } 
+    // Otherwise check Sector prices
+    elseif ($unit->sector && $unit->sector->price > 0) {
+        $final_price = $unit->sector->price;
+        $final_vat = $unit->sector->vat;
+        $final_total = $unit->sector->total;
+    }
+
+    return [
+        'price' => $final_price,
+        'total' => $final_total,
+        'vat' => $final_vat
+    ];
 }
