@@ -1,0 +1,184 @@
+name: CI/CD - Composer build & SSH deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PHP_VERSION: "8.2"
+  APP_REMOTE_PATH: ${{ secrets.DEPLOY_PATH }}
+
+jobs:
+  build:
+    name: Build (composer only)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, gd, bcmath, zip, fileinfo, redis
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate composer.json
+        run: composer validate --strict --no-check-publish
+
+      - name: Cache composer vendor
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-php${{ env.PHP_VERSION }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-php${{ env.PHP_VERSION }}-
+
+      - name: Install production dependencies
+        run: |
+          composer install \
+            --no-dev \
+            --no-interaction \
+            --no-progress \
+            --prefer-dist \
+            --optimize-autoloader
+
+      - name: Package release artifact
+        run: |
+          tar --exclude-from=.github/deploy/exclude.txt \
+              -czf release.tgz .
+          ls -lh release.tgz
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: release.tgz
+          retention-days: 7
+
+  deploy:
+    name: Deploy (rsync over SSH)
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    environment: production
+    steps:
+      - name: Checkout (for exclude list & scripts)
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, gd, bcmath, zip, fileinfo, redis
+          coverage: none
+          tools: composer:v2
+
+      - name: Restore composer cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-php${{ env.PHP_VERSION }}-${{ hashFiles('composer.lock') }}
+
+      - name: Install production dependencies
+        run: |
+          composer install \
+            --no-dev \
+            --no-interaction \
+            --no-progress \
+            --prefer-dist \
+            --optimize-autoloader
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "${{ secrets.DEPLOY_PORT }}" -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          fi
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Pre-deploy backup of vendor on remote
+        env:
+          SSH_OPTS: "-i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -p ${{ secrets.DEPLOY_PORT }}"
+        run: |
+          ssh $SSH_OPTS \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "cd '${{ secrets.DEPLOY_PATH }}' && \
+             [ -d vendor ] && tar -czf vendor-backup-$(date +%F-%H%M%S).tgz vendor || echo 'no vendor yet'"
+
+      - name: Maintenance ON
+        env:
+          SSH_OPTS: "-i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -p ${{ secrets.DEPLOY_PORT }}"
+        run: |
+          ssh $SSH_OPTS \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "cd '${{ secrets.DEPLOY_PATH }}' && php artisan down --retry=15 --render='errors::503' || true"
+
+      - name: Rsync project (excluding public/, .env, dev assets)
+        run: |
+          rsync -avz --delete-after \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -p ${{ secrets.DEPLOY_PORT }}" \
+            --exclude-from=.github/deploy/exclude.txt \
+            ./ \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/"
+
+      - name: Ship root .htaccess (root → public redirect)
+        run: |
+          rsync -av \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -p ${{ secrets.DEPLOY_PORT }}" \
+            ./.htaccess \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/.htaccess"
+
+      - name: Post-deploy artisan (migrate + cache)
+        env:
+          SSH_OPTS: "-i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -p ${{ secrets.DEPLOY_PORT }}"
+        run: |
+          ssh $SSH_OPTS \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "cd '${{ secrets.DEPLOY_PATH }}' && \
+             php artisan config:clear && \
+             php artisan route:clear && \
+             php artisan view:clear && \
+             php artisan migrate --force && \
+             php artisan config:cache && \
+             php artisan route:cache && \
+             php artisan view:cache && \
+             php artisan optimize"
+
+      - name: Maintenance OFF
+        if: always()
+        env:
+          SSH_OPTS: "-i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -p ${{ secrets.DEPLOY_PORT }}"
+        run: |
+          ssh $SSH_OPTS \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "cd '${{ secrets.DEPLOY_PATH }}' && php artisan up || true"
+
+      - name: Smoke test (HTTP 200)
+        if: success()
+        run: |
+          for i in 1 2 3 4 5; do
+            code=$(curl -sk -o /dev/null -w "%{http_code}" "${{ secrets.DEPLOY_HEALTH_URL }}") || code="000"
+            echo "attempt=$i status=$code"
+            if [ "$code" = "200" ] || [ "$code" = "302" ]; then exit 0; fi
+            sleep 5
+          done
+          echo "Smoke test failed"; exit 1
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

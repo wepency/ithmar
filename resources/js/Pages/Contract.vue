@@ -44,11 +44,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="cus-width">Phone :</label>
-                            <label>{{ mainInfo.phone }}</label>
-                        </div>
-
-                        <div class="form-group">
                             <label class="cus-width">Website:</label>
                             <label>{{ mainInfo.email }}</label>
                         </div>
@@ -189,7 +184,15 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
+                        <tr v-for="companion in companions" :key="companion.id">
+                            <th class="cus-ceil title-ceil">بيانات المرافق ({{companion.title}})</th>
+                            <td class="cus-ceil">{{ companion.name }}</td>
+                            <th class="cus-ceil title-ceil">رقم الهوية</th>
+                            <td class="cus-ceil">{{ companion.id_number }}</td>
+                            <th class="cus-ceil title-ceil">جنسية المرافق</th>
+                            <td class="cus-ceil">{{ companion.nationality }}</td>
+                        </tr>
+                        <tr v-if="!companions.length">
                             <th class="cus-ceil title-ceil">بيانات المرافق ({{with_tenant_title}})</th>
                             <td class="cus-ceil">{{ userInfo.with_tenant_name }}</td>
                             <th class="cus-ceil title-ceil">رقم الهوية</th>
@@ -212,9 +215,7 @@
 
                         <tr>
                             <th class="cus-ceil title-ceil">جنسيه المستاجر</th>
-                            <td class="cus-ceil">{{ userInfo.tenant_nationality }}</td>
-                            <th class="font-weight-bold cus-ceil title-ceil">جنسيه المرافق</th>
-                            <td class="cus-ceil">{{ userInfo.with_tenant_nationality }}</td>
+                            <td class="cus-ceil" colspan="3">{{ userInfo.tenant_nationality }}</td>
                             <th class="cus-ceil title-ceil">مبلغ التامين</th>
                             <td class="cus-ceil text-center">{{ userInfo.insurance_value }}</td>
                         </tr>
@@ -295,6 +296,14 @@
                         15.دخول أي سيارة إضافية غير المصرح لها في العقد سيتم خصم مبلغ التأمين كاملاً.
                     </p>
 
+                    <p class="point">
+                        16. خاص بتاجير الشباب الأحلام 6 اشخاص فقط (شباب) الحمراء 6 أشخاص فقط (شباب) المونتانا 3 أشخاص فقط (شباب) في حال لوحظ وجود أكثر من العدد المسموح يخصم 1000 ريال من التأمين.
+                    </p>
+
+                    <p class="point" v-if="unitInfo.sector_id == 5">
+                        17. في حالة الافتراش او السباحة خارج الموقع المؤجر يتم خصم كامل مبلغ التأمين.
+                    </p>
+
                 </div>
 
                 <div class="section-three">
@@ -356,9 +365,9 @@
                             <th scope="col" class="cus-ceil title-ceil cus-padding">
                                 المالك المفوض: <i>{{userInfo.user_name}}</i>
                             </th>
-                            <th scope="col" class="cus-ceil title-ceil cus-padding">
+                            <!-- <th scope="col" class="cus-ceil title-ceil cus-padding">
                                 بادارة
-                            </th>
+                            </th> -->
                         </tr>
                         </thead>
                         <tbody>
@@ -379,10 +388,9 @@
                                 <h3 v-if="is_reservation" style="color: red">{{remaining_payment}} ر.س</h3>
                             </td>
 
-                            <td class="cus-ceil cus-padding">
-                                <!--                                <img src="https://via.placeholder.com/150x150" alt="" />-->
+                            <!-- <td class="cus-ceil cus-padding">
                                 <img src="/images/signature-small.jpg" alt="" />
-                            </td>
+                            </td> -->
                         </tr>
                         </tbody>
                     </table>
@@ -393,15 +401,15 @@
 </template>
 
 <script>
-import print from "vue-print-nb";
+import print from "vue3-print-nb";
 import QrcodeVue from "qrcode.vue";
 import axios from 'axios'
 
-directives: {
-    print;
-}
 export default {
     name: "Contract",
+    directives: {
+        print
+    },
     data() {
         return {
             url: '',
@@ -416,7 +424,6 @@ export default {
             services: {},
             mainInfo: {
                 name: "",
-                phone: "",
                 email: "",
                 website: "",
                 vat: ""
@@ -456,6 +463,7 @@ export default {
             },
 
             cars: {},
+            companions: [],
 
             QRCodeLink: "",
             printLoading: true,
@@ -496,7 +504,6 @@ export default {
                 const obj = result.data.data;
 
                 $this.mainInfo.name = obj.name;
-                $this.mainInfo.phone = obj.phonenumber;
                 $this.mainInfo.email = obj.email;
                 $this.mainInfo.website = obj.website;
                 $this.mainInfo.vat = obj.vat;
@@ -515,7 +522,6 @@ export default {
                 // Cancelled
                 $this.is_cancelled = obj.is_cancelled;
 
-                // $this.mainInfo.phone = data.data.user.phonenumber;
                 // $this.mainInfo.email = data.data.user.email;
                 // $this.mainInfo.website = data.data.user.website;
                 // $this.mainInfo.vat = 15;
@@ -527,6 +533,7 @@ export default {
                 $this.unitInfo.unitName    = obj.unit_name;
 
                 $this.cars = obj.cars
+                $this.companions = obj.companions || []
 
                 $this.userInfo.user_name = obj.user_name;
                 $this.userInfo.tenant_name = obj.tenant_name;

@@ -81,6 +81,10 @@ class Contract extends Model
         return $this->hasMany(Car::class);
     }
 
+    public function companions(){
+        return $this->hasMany(ContractCompanion::class)->orderBy('sort_order');
+    }
+
     public function bond(){
         return $this->hasMany(InvestorBonds::class);
     }

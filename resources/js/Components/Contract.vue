@@ -5,10 +5,10 @@
                 <div class="form-group">
                     <h3 class="text-center">عقد جديد</h3>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label>Phone</label>
                     <input type="text" class="form-control" v-model="mainInfo.phone" />
-                </div>
+                </div> -->
 
                 <div class="form-group">
                     <label>E-mail</label>
@@ -34,10 +34,10 @@
                     </div>
 
                     <div class="info">
-                        <div class="form-group">
+                        <!-- <div class="form-group">
                             <label class="cus-width">Phone :</label>
                             <label>{{ mainInfo.phone }}</label>
-                        </div>
+                        </div> -->
 
                         <div class="form-group">
                             <label class="cus-width">Email :</label>
@@ -258,6 +258,10 @@
                     <p class="point">
                         12. قيمة العقد غير مستودة ولايمكن التعديل او تغيير العقد بعد إصدارة
                         لأي سبب كان .
+                    </p>
+
+                    <p class="point">
+                        13. خاص بتاجير الشباب الأحلام 6 اشخاص فقط (شباب) الحمراء 6 أشخاص فقط (شباب) المونتانا 3 أشخاص فقط (شباب) في حال لوحظ وجود أكثر من العدد المسموح يخصم 1000 ريال من التأمين.
                     </p>
                 </div>
 

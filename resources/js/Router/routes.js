@@ -20,6 +20,11 @@ const routes = [
         component: () => import('../Pages/Contract.vue')
     },
     {
+        path: "/contract/:code",
+        name: 'contract-simple',
+        component: () => import('../Pages/Contract.vue')
+    },
+    {
         path: "/dashboard/contract/show/:code",
         name: 'code-contract',
         component: () => import('../Pages/Contract.vue')
@@ -33,6 +38,21 @@ const routes = [
         path: "/myfatoorah/success",
         name: 'public-fatoorah-contract',
         component: () => import('../Pages/Contract.vue')
+    },
+    {
+        path: "/contract/draft/:code/:token",
+        name: 'investor-draft-contract',
+        component: () => import('../Pages/Draft.vue')
+    },
+    {
+        path: "/public/contract/draft/:code/:token",
+        name: 'investor-public-draft-contract',
+        component: () => import('../Pages/Draft.vue')
+    },
+    {
+        path: "/draft/:code",
+        name: 'draft-code',
+        component: () => import('../Pages/Draft.vue')
     },
   {
     path: "/pdf",

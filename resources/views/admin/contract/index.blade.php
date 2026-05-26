@@ -304,7 +304,7 @@
                                                 @endcan
 
                                                 @if(is_admin())
-                                                    @can('can edit contract')
+                                                    <!-- @can('can edit contract') -->
                                                         @if(is_null($row->is_cancelled))
                                                             <form onsubmit="return confirm('هل تريد حقا إلغاء العقد؟')"
                                                                   style="display: inline-block;margin: 0"
@@ -320,7 +320,7 @@
                                                         <a class="btn btn-primary"
                                                            href="{{admin_url('contract/'.$row->id.'/edit')}}"><i
                                                                     style="color: #fff" class="fa fa-edit"></i></a>
-                                                    @endcan
+                                                    <!-- @endcan -->
                                                 @endif
 
                                                 @if(is_admin() && (auth()->id() == 75 || auth()->id() == 389))

@@ -48,6 +48,17 @@ class ContractsResource extends JsonResource
             'total_amount' => total_amount($this->price, $this->total),
             'balance' => $this->total,
             'cars' => $this->cars,
+            'companions' => $this->companions->map(function ($companion) {
+                return [
+                    'id' => $companion->id,
+                    'title' => trans('admin.' . $companion->title),
+                    'title_key' => $companion->title,
+                    'name' => $companion->name,
+                    'id_number' => $companion->id_number,
+                    'nationality' => $companion->nationality,
+                    'barcode' => $this->get_image($companion->barcode_image),
+                ];
+            }),
             'services' => $this->services ? unserialize($this->services->service_data) : [],
             'tenant_title' => trans('admin.'.$this->tenant_title),
             'with_tenant_title' => trans('admin.'.$this->with_tenant_title),

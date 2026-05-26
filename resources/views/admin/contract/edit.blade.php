@@ -188,42 +188,11 @@ $tomorrow = $contract->exists ? $carbon->parse($contract->to)->format($format) :
                     </div>
 
                     <div class="row">
-                        <div class="form-group col-md-4 col-xs-9 ">
-                            <div class="form-inline">
-                                <label for="with_tenant_name">بيانات المرافق</label>: &nbsp;<input id="wife" type="radio" name="with_tenant_title" value="wife" checked /> &nbsp;
-                                <label for="wife">زوج/ة</label> &nbsp;&nbsp;
-                                <input id="mother" type="radio" name="with_tenant_title" value="mother" {{old('with_tenant_title') == 'mother' ? 'checked' : ($contract->with_tenant_title == 'mother' ? 'checked' : '')}} /> &nbsp;
-                                <label for="mother">والد/ة</label> &nbsp;&nbsp;
-                                <input id="sister" type="radio" name="with_tenant_title" value="sister" {{old('with_tenant_title') == 'sister' ? 'checked' : ($contract->with_tenant_title == 'sister' ? 'checked' : '')}} /> &nbsp;
-                                <label for="sister">أخ/أخت</label>
-                                <input id="daughter" type="radio" name="with_tenant_title" value="daughter" {{old('with_tenant_title') == 'daughter' ? 'checked' : ($contract->with_tenant_title == 'daughter' ? 'checked' : '')}} /> &nbsp;
-                                <label for="daughter">ابن/ة</label>
-                                <input id="sister" type="radio" name="with_tenant_title" value="others" {{old('with_tenant_title') == 'others' ? 'checked' : ($contract->with_tenant_title == 'others' ? 'checked' : '')}} /> &nbsp;
-                                <label for="sister">أخرى</label>
-                            </div>
-{{--                            <label for="with_tenant_name">  بيانات المرافق </label>--}}
-                            <input id="with_tenant_name" type="text" class="form-control" required name="with_tenant_name" value="{{old('with_tenant_name') ?? $contract->with_tenant_name}}" style="width: 100%;" />
-                        </div>
-
-                        <div class="form-group col-md-4 col-xs-9 ">
-                            <label for="with_tenant_name_code">  هوية المرافق </label>
-                            <input id="with_tenant_name_code" value="{{old('with_tenant_name_code') ?? $contract->with_tenant_name_code}}" type="text" class="form-control" required name="with_tenant_name_code" style="width: 100%;" />
-                        </div>
-                    </div>
-
-                    <div class="row">
                         <div class="form-group col-md-4 col-xs-9">
                             <label for="tenant_nationality">  جنسية المستأجر </label>
                             <input id="tenant_nationality" value="{{old('tenant_nationality') ?? $contract->tenant_nationality}}" type="text" class="form-control" required name="tenant_nationality" style="width: 100%;" />
                         </div>
 
-                        <div class="form-group col-md-4 col-xs-9">
-                            <label for="with_tenant_nationality">  جنسية المرافق </label>
-                            <input id="with_tenant_nationality" value="{{old('with_tenant_nationality') ?? $contract->with_tenant_nationality}}" type="text" class="form-control" required name="with_tenant_nationality" style="width: 100%;" />
-                        </div>
-                    </div>
-
-                    <div class="row">
                         <div class="form-group col-md-4 col-xs-9 ">
                             <label for="attachment_1">باركود هوية المستأجر (إختياري)</label>
                             <div class="uploaded-image">
@@ -236,31 +205,101 @@ $tomorrow = $contract->exists ? $carbon->parse($contract->to)->format($format) :
                             </div>
 
                             <input data-barcode-image="rental-barcode-image" data-barcode-input="rental-barcode-image-input" type="file" class="form-control single-file-upload @error('attachment_1') is-invalid @enderror" accept="image/*" value="{{old('attachment_1')}}" id="attachment_1" name="attachment_1" />
-{{--                            <input id="attachment_1" type="file" class="form-control" required name="attachment_1" style="width: 100%;" />--}}
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="form-group col-md-4 col-xs-9 ">
-                            <label for="attachment_2">باركود هوية المرافق (إختياري)</label>
-{{--                            <input id="attachment_2" type="file" class="form-control" required name="attachment_2" style="width: 100%;" />--}}
+                    <h4 style="margin-top: 25px"><strong>المرافقون</strong></h4>
 
-                            <input type="file" data-barcode-image="with-rental-barcode-image" data-barcode-input="with-rental-barcode-image-input" class="form-control single-file-upload @error('attachment_2') is-invalid @enderror" accept="image/*" value="{{old('attachment_2')}}" id="attachment_2" name="attachment_2" />
+                    <div id="admin-companions-wrapper">
+                        @php
+                            $existingCompanions = old('companions');
+                            if (!is_array($existingCompanions) || count($existingCompanions) === 0) {
+                                if ($contract->exists && $contract->companions->count() > 0) {
+                                    $existingCompanions = $contract->companions->map(function($c){
+                                        return [
+                                            'id' => $c->id,
+                                            'title' => $c->title,
+                                            'name' => $c->name,
+                                            'id_number' => $c->id_number,
+                                            'nationality' => $c->nationality,
+                                            'barcode_image' => $c->barcode_image,
+                                        ];
+                                    })->toArray();
+                                } elseif ($contract->exists && $contract->with_tenant_name) {
+                                    $existingCompanions = [[
+                                        'id' => null,
+                                        'title' => $contract->with_tenant_title ?: 'wife',
+                                        'name' => $contract->with_tenant_name,
+                                        'id_number' => $contract->with_tenant_name_code,
+                                        'nationality' => $contract->with_tenant_nationality,
+                                        'barcode_image' => $contract->attachment_2,
+                                    ]];
+                                } else {
+                                    $existingCompanions = [['id' => null, 'title' => 'wife', 'name' => '', 'id_number' => '', 'nationality' => '', 'barcode_image' => null]];
+                                }
+                            }
+                            $titleOptions = ['wife' => 'زوج/ة', 'mother' => 'والد/ة', 'sister' => 'أخ/أخت', 'daughter' => 'ابن/ة', 'others' => 'أخرى'];
+                        @endphp
 
-                            <div class="uploaded-image">
-                                <label class="upload-button" for="attachment_2"><img src="{{asset('images/icons/computing-cloud.svg')}}" alt="upload-image" style="width: 50px;height: auto" /></label>
+                        @foreach($existingCompanions as $i => $c)
+                            <div class="admin-companion-card border rounded p-3 mb-3" data-companion-index="{{ $i }}">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">المرافق <span class="companion-num">{{ $i + 1 }}</span></h5>
+                                    <button type="button" class="btn btn-sm btn-outline-danger admin-companion-remove" {{ $i === 0 ? 'style=display:none;' : '' }}>× إزالة</button>
+                                </div>
 
-                                <div class="uploaded-image-wrapper">
-                                    <img src="" alt="" id="with-rental-barcode-image" />
-                                    <input type="hidden" name="with_rental_barcode_image" id="with-rental-barcode-image-input" />
+                                @if(!empty($c['id']))
+                                    <input type="hidden" name="companions[{{ $i }}][id]" value="{{ $c['id'] }}" />
+                                @endif
+
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>صلة القرابة</label>
+                                        <div class="form-inline">
+                                            @foreach($titleOptions as $value => $label)
+                                                <label class="mr-3" style="margin-left:14px;">
+                                                    <input type="radio" name="companions[{{ $i }}][title]" value="{{ $value }}" {{ ($c['title'] ?? 'wife') === $value ? 'checked' : '' }} /> {{ $label }}
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-4">
+                                        <label>اسم المرافق</label>
+                                        <input type="text" class="form-control" maxlength="191" name="companions[{{ $i }}][name]" value="{{ $c['name'] ?? '' }}" required />
+                                    </div>
+
+                                    <div class="form-group col-md-4">
+                                        <label>رقم الهوية</label>
+                                        <input type="text" class="form-control" maxlength="10" name="companions[{{ $i }}][id_number]" value="{{ $c['id_number'] ?? '' }}" required />
+                                    </div>
+
+                                    <div class="form-group col-md-4">
+                                        <label>جنسية المرافق</label>
+                                        <input type="text" class="form-control" maxlength="191" name="companions[{{ $i }}][nationality]" value="{{ $c['nationality'] ?? '' }}" required />
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label>باركود هوية المرافق (إختياري)</label>
+                                        <input type="file" class="form-control" accept="image/*" name="companions[{{ $i }}][barcode]" />
+                                        @if(!empty($c['barcode_image']) && file_exists(public_path('uploads/' . $c['barcode_image'])))
+                                            <div class="mt-2">
+                                                <img src="{{ asset('uploads/' . $c['barcode_image']) }}" alt="barcode" style="max-height: 80px; border-radius: 6px;" />
+                                                <small class="text-muted d-block">الصورة الحالية. ارفع جديدة لاستبدالها.</small>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-
-                            @error('attachment_2')
-                            <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        @endforeach
                     </div>
+
+                    <button type="button" id="admin-add-companion" class="btn btn-outline-primary mb-3" style="display:none;">+ إضافة مرافق</button>
+                    <p class="text-muted small mb-3" id="admin-companions-hint" style="display:none;">يمكنك إضافة حتى {{ $companionsMax ?? 5 }} مرافقين لهذا القطاع.</p>
 
                     <div class="row">
                         <div class="form-group col-md-4 col-xs-9 ">
@@ -556,6 +595,94 @@ $tomorrow = $contract->exists ? $carbon->parse($contract->to)->format($format) :
                     });
                 };
             });
+        });
+
+        // Admin companions — dynamic add/remove
+        const ADMIN_COMPANIONS_MAX = {{ (int) ($companionsMax ?? 5) }};
+        const ADMIN_COMPANIONS_SECTOR = {{ (int) ($companionsMultiSectorId ?? 3) }};
+        const ADMIN_COMPANION_ORDINALS = ['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر'];
+
+        function adminCompanionHeadingText(index){
+            return 'المرافق ' + (ADMIN_COMPANION_ORDINALS[index] || ('رقم ' + (index + 1)));
+        }
+
+        function adminCompanionRowHtml(index){
+            const prefix = 'companions['+index+']';
+            return '' +
+                '<div class="admin-companion-card border rounded p-3 mb-3" data-companion-index="'+index+'">' +
+                    '<div class="d-flex justify-content-between align-items-center mb-2">' +
+                        '<h5 class="mb-0">'+adminCompanionHeadingText(index)+'</h5>' +
+                        '<button type="button" class="btn btn-sm btn-outline-danger admin-companion-remove">× إزالة</button>' +
+                    '</div>' +
+                    '<div class="row">' +
+                        '<div class="form-group col-md-12">' +
+                            '<label>صلة القرابة</label>' +
+                            '<div class="form-inline">' +
+                                '<label class="mr-3" style="margin-left:14px;"><input type="radio" name="'+prefix+'[title]" value="wife" checked> زوج/ة</label>' +
+                                '<label class="mr-3" style="margin-left:14px;"><input type="radio" name="'+prefix+'[title]" value="mother"> والد/ة</label>' +
+                                '<label class="mr-3" style="margin-left:14px;"><input type="radio" name="'+prefix+'[title]" value="sister"> أخ/أخت</label>' +
+                                '<label class="mr-3" style="margin-left:14px;"><input type="radio" name="'+prefix+'[title]" value="daughter"> ابن/ة</label>' +
+                                '<label class="mr-3" style="margin-left:14px;"><input type="radio" name="'+prefix+'[title]" value="others"> أخرى</label>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="row">' +
+                        '<div class="form-group col-md-4"><label>اسم المرافق</label><input type="text" class="form-control" maxlength="191" name="'+prefix+'[name]" required></div>' +
+                        '<div class="form-group col-md-4"><label>رقم الهوية</label><input type="text" class="form-control" maxlength="10" name="'+prefix+'[id_number]" required></div>' +
+                        '<div class="form-group col-md-4"><label>جنسية المرافق</label><input type="text" class="form-control" maxlength="191" name="'+prefix+'[nationality]" required></div>' +
+                    '</div>' +
+                    '<div class="row">' +
+                        '<div class="form-group col-md-12"><label>باركود هوية المرافق (إختياري)</label><input type="file" class="form-control" accept="image/*" name="'+prefix+'[barcode]"></div>' +
+                    '</div>' +
+                '</div>';
+        }
+
+        function adminReindexCompanions(){
+            $('#admin-companions-wrapper .admin-companion-card').each(function(newIndex){
+                const card = $(this);
+                card.attr('data-companion-index', newIndex);
+                card.find('h5').first().text(adminCompanionHeadingText(newIndex));
+                card.find('[name^="companions["]').each(function(){
+                    const n = $(this).attr('name');
+                    $(this).attr('name', n.replace(/companions\[\d+\]/, 'companions['+newIndex+']'));
+                });
+                card.find('.admin-companion-remove').toggle(newIndex > 0);
+            });
+        }
+
+        function adminRefreshCompanionControls(){
+            const sectorId = parseInt($('#sector_id').val(), 10);
+            const allowsMultiple = sectorId === ADMIN_COMPANIONS_SECTOR;
+            const count = $('#admin-companions-wrapper .admin-companion-card').length;
+
+            if (allowsMultiple && count < ADMIN_COMPANIONS_MAX) {
+                $('#admin-add-companion').show();
+                $('#admin-companions-hint').show();
+            } else {
+                $('#admin-add-companion').hide();
+                $('#admin-companions-hint').hide();
+            }
+
+            if (!allowsMultiple && count > 1) {
+                $('#admin-companions-wrapper .admin-companion-card').slice(1).remove();
+                adminReindexCompanions();
+            }
+        }
+
+        adminRefreshCompanionControls();
+        $('#sector_id').on('change', adminRefreshCompanionControls);
+
+        $('#admin-add-companion').on('click', function(){
+            const count = $('#admin-companions-wrapper .admin-companion-card').length;
+            if (count >= ADMIN_COMPANIONS_MAX) return;
+            $('#admin-companions-wrapper').append(adminCompanionRowHtml(count));
+            adminRefreshCompanionControls();
+        });
+
+        $('body').on('click', '.admin-companion-remove', function(){
+            $(this).closest('.admin-companion-card').remove();
+            adminReindexCompanions();
+            adminRefreshCompanionControls();
         });
     </script>
 @endsection

@@ -1,0 +1,63 @@
+# Files & directories NEVER pushed to the production server.
+# Two non-negotiable rules:
+#   1) /public is owned by the server (uploads, manifests, etc.) — never sync it.
+#   2) /.env is environment-specific — never overwrite it remotely.
+
+# --- Source-only / tooling (we use composer.json only; package.json is ignored) ---
+package.json
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+webpack.mix.js
+vite.config.*
+node_modules/
+resources/js/
+resources/sass/
+resources/css/
+
+# --- VCS / CI / editors ---
+.git/
+.github/
+.gitignore
+.gitattributes
+.editorconfig
+.styleci.yml
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# --- OS noise ---
+.DS_Store
+Thumbs.db
+
+# --- Tests / dev only ---
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# --- Local docker / sail ---
+docker-compose*.yml
+Dockerfile*
+
+# --- Local logs / caches that belong to the server ---
+storage/logs/*
+!storage/logs/.gitkeep
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# --- CRITICAL: keep production env & public/ untouched ---
+.env
+.env.backup
+.env.testing
+public/
+
+# --- Misc artifacts ---
+release.tgz
+*.log
+*.bak
+*.sql
+*.sqlite
+coverage/
+README.md

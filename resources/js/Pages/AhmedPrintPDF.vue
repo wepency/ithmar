@@ -347,14 +347,14 @@
 </template>
 
 <script>
-import print from "vue-print-nb";
+import print from "vue3-print-nb";
 import QrcodeVue from "qrcode.vue";
 
-directives: {
-  print;
-}
 export default {
   name: "AhmedPrintPDF",
+  directives: {
+    print
+  },
   data() {
     return {
       mainInfo: {

@@ -102,6 +102,19 @@
                                                     <select id="unit_id" name="unit" class="form-control"></select>
                                                 </div>
                                             </div>
+
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="form-group">
+                                                    <label for="unit_status">حالة الوحدات</label>
+
+                                                    <select id="unit_status" name="unit_status" class="form-control">
+                                                        <option value=""></option>
+                                                        <option value="active" {{request()->unit_status == 'active' ? 'selected' : ''}}>فعال</option>
+                                                        <option value="inactive" {{request()->unit_status == 'inactive' ? 'selected' : ''}}>غير فعال</option>
+                                                        <option value="terminated" {{request()->unit_status == 'terminated' ? 'selected' : ''}}>مشطوب</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div class="row">

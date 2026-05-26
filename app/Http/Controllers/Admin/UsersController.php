@@ -66,6 +66,31 @@ class UsersController extends Controller
         if ($request->phonenumber != '')
             $rows = $rows->where('phonenumber', 'like', '%'.$request->phonenumber.'%');
 
+        if ($request->unit_status != '') {
+            $unitStatusFilter = function ($q) use ($request) {
+                if ($request->unit_status == 'terminated') {
+                    $q->where('is_terminated', 1);
+                } elseif ($request->unit_status == 'active') {
+                    $q->where(function ($qq) {
+                        $qq->whereNull('is_terminated')->orWhere('is_terminated', 0);
+                    })
+                    ->where('valid_to', '>', Carbon::now())
+                    ->where('status', 1);
+                } elseif ($request->unit_status == 'inactive') {
+                    $q->where(function ($qq) {
+                        $qq->whereNull('is_terminated')->orWhere('is_terminated', 0);
+                    })
+                    ->where(function ($qq) {
+                        $qq->where('valid_to', '<=', Carbon::now())
+                           ->orWhere('status', '!=', 1);
+                    });
+                }
+            };
+
+            $rows = $rows->whereHas('unit', $unitStatusFilter)
+                ->with(['unit' => $unitStatusFilter, 'unitOrder' => $unitStatusFilter]);
+        }
+
         $rows = $rows->orderBy('id', 'DESC')->paginate();
 
         $roles = Role::all();

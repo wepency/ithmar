@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Car;
 use App\Models\Contract;
+use App\Models\ContractCompanion;
 use App\Models\contractService;
 use App\Models\History;
 use App\Models\Setting;
@@ -144,8 +145,13 @@ class ContractsController extends Controller
         $sectors  = Sector::get();
         $beaches  = Beach::where('sector_id', $contract->sector_id)->get();
         $units    = Unit::where('beach_id', $contract->beach_id)->get();
+        $companionsMax = config('contracts.companions.max');
+        $companionsMultiSectorId = config('contracts.companions.multi_sector_id');
 
-        return view('admin.contract.edit', compact('contract', 'sectors', 'beaches', 'units', 'page_title'));
+        return view('admin.contract.edit', compact(
+            'contract', 'sectors', 'beaches', 'units', 'page_title',
+            'companionsMax', 'companionsMultiSectorId'
+        ));
     }
 
     public function store(Request $request)
@@ -158,20 +164,28 @@ class ContractsController extends Controller
             'to' => 'required',
             'tenant_name' => 'required|max:191',
             'tenant_name_code' => 'required|size:10',
-            'with_tenant_title' => 'required|max:191',
-            'with_tenant_name' => 'required|max:191',
-            'with_tenant_name_code' => 'required|size:10',
             'rent_value' => 'required|numeric|max:1000000',
             'attachment_1' => 'nullable|image',
-            'attachment_2' => 'nullable|image',
             'tenant_nationality' => 'required|max:191',
-            'with_tenant_nationality' => 'required|max:191',
             'insurance_value' => 'required|max:1000000',
             'phonenumber' => 'required|min:8|max:15',
-            'car' => 'required|array'
+            'car' => 'required|array',
+            'companions' => 'required|array|min:1|max:' . config('contracts.companions.max'),
+            'companions.*.title' => 'required|in:wife,mother,sister,daughter,others',
+            'companions.*.name' => 'required|max:191',
+            'companions.*.id_number' => 'required|size:10',
+            'companions.*.nationality' => 'required|max:191',
+            'companions.*.barcode' => 'nullable|image',
         ];
 
         $request->validate($validate);
+
+        $multiSectorId = (int) config('contracts.companions.multi_sector_id');
+        if ((int) $request->sector_id !== $multiSectorId && count($request->companions) !== 1) {
+            return redirect()->back()
+                ->withInput($request->input())
+                ->withErrors(['companions' => 'يمكن إضافة أكثر من مرافق فقط للقطاع رقم ' . $multiSectorId . '.']);
+        }
 
         return DB::transaction(function () use ($request){
             $contract = new Contract;
@@ -210,13 +224,6 @@ class ContractsController extends Controller
             $data['attachment_1'] = $filename_1;
         }
 
-        if ($request->attachment_2){
-            $file_2 = $request->file('attachment_2');
-            $filename_2 = Str::slug($file_2->getClientOriginalName()).'-'.rand(1111,9999).'.'.$file_2->getClientOriginalExtension();
-            $file_2->move('uploads', $filename_2);
-            $data['attachment_2'] = $filename_2;
-        }
-
         // Default values from settings
         $price_before = $settings->price_before_vat;
         $price_after = $settings->price_after_vat;
@@ -238,10 +245,15 @@ class ContractsController extends Controller
         $data['tenant_name_code'] = $request->tenant_name_code;
         $data['tenant_nationality'] = $request->tenant_nationality;
 
-        $data['with_tenant_title'] = $request->with_tenant_title;
-        $data['with_tenant_name'] = $request->with_tenant_name;
-        $data['with_tenant_name_code'] = $request->with_tenant_name_code;
-        $data['with_tenant_nationality'] = $request->with_tenant_nationality;
+        $companionsInput = $request->input('companions', []);
+        $firstCompanion = $companionsInput[array_key_first($companionsInput)] ?? null;
+
+        if ($firstCompanion) {
+            $data['with_tenant_title'] = $firstCompanion['title'];
+            $data['with_tenant_name'] = $firstCompanion['name'];
+            $data['with_tenant_name_code'] = $firstCompanion['id_number'];
+            $data['with_tenant_nationality'] = $firstCompanion['nationality'];
+        }
 
         $data['insurance_value'] = $request->insurance_value;
         $data['rent_value'] = $request->rent_value;
@@ -291,11 +303,16 @@ class ContractsController extends Controller
 
         if (!empty($request->car)){
             foreach ($request->car as $c){
-                if ($c['type'] != '' || $c['serial'] != '' || $c['passenger_name'] != '' || $c['identity'] != ''){
-                    $carArray[$i]['car_type'] = $c['type'];
-                    $carArray[$i]['car_serial'] = isset($c['serial']) ? $c['serial'] : '';
-                    $carArray[$i]['passenger_name'] = isset($c['passenger_name']) ? $c['passenger_name'] : '';
-                    $carArray[$i]['identity'] = isset($c['identity']) ? $c['identity'] : '';
+                $type = $c['type'] ?? '';
+                $serial = $c['serial'] ?? '';
+                $passenger = $c['passenger_name'] ?? '';
+                $identity = $c['identity'] ?? '';
+
+                if ($type !== '' || $serial !== '' || $passenger !== '' || $identity !== ''){
+                    $carArray[$i]['car_type'] = $type;
+                    $carArray[$i]['car_serial'] = $serial;
+                    $carArray[$i]['passenger_name'] = $passenger;
+                    $carArray[$i]['identity'] = $identity;
                     $carArray[$i]['contract_id'] = $contract_exists ? $contract->id : $contract_id;
                 }
 
@@ -303,6 +320,37 @@ class ContractsController extends Controller
             }
 
             DB::table('cars')->insert($carArray);
+        }
+
+        // Companions — wipe and re-insert (mirrors the cars approach)
+        if ($contract_exists) {
+            ContractCompanion::where('contract_id', $contract->id)->delete();
+        }
+
+        $sort = 0;
+        foreach ($companionsInput as $key => $companion) {
+            $barcodeFilename = null;
+            if ($request->hasFile("companions.$key.barcode")) {
+                $barcodeFile = $request->file("companions.$key.barcode");
+                $barcodeFilename = Str::slug($barcodeFile->getClientOriginalName()) . '-' . rand(1111, 9999) . '.' . $barcodeFile->getClientOriginalExtension();
+                $barcodeFile->move('uploads', $barcodeFilename);
+            }
+
+            ContractCompanion::create([
+                'contract_id'   => $contract->id,
+                'title'         => $companion['title'],
+                'name'          => $companion['name'],
+                'id_number'     => $companion['id_number'],
+                'nationality'   => $companion['nationality'],
+                'barcode_image' => $barcodeFilename,
+                'sort_order'    => $sort,
+            ]);
+
+            if ($sort === 0 && $barcodeFilename) {
+                $contract->attachment_2 = $barcodeFilename;
+            }
+
+            $sort++;
         }
 
         // Services
@@ -397,14 +445,18 @@ class ContractsController extends Controller
 
     public function edit($id)
     {
-        $contract = Contract::findOrFail($id);
+        $contract = Contract::with('companions')->findOrFail($id);
         $page_title = 'تعديل العقد '.$contract->code;
         $sectors  = Sector::get();
         $beaches  = Beach::where('sector_id', $contract->sector_id)->get();
         $units    = Unit::where('beach_id', $contract->beach_id)->get();
+        $companionsMax = config('contracts.companions.max');
+        $companionsMultiSectorId = config('contracts.companions.multi_sector_id');
 
-//        if ()
-        return view('admin.contract.edit', compact('contract', 'page_title', 'sectors', 'beaches', 'units'));
+        return view('admin.contract.edit', compact(
+            'contract', 'page_title', 'sectors', 'beaches', 'units',
+            'companionsMax', 'companionsMultiSectorId'
+        ));
     }
 
     public function update(Request $request, $id)
@@ -417,17 +469,26 @@ class ContractsController extends Controller
             'to' => 'required',
             'tenant_name' => 'required|max:191',
             'tenant_name_code' => 'required|size:10',
-            'with_tenant_title' => 'required|max:191',
-            'with_tenant_name' => 'required|max:191',
-            'with_tenant_name_code' => 'required|size:10',
             'rent_value' => 'required|numeric|max:100000',
             'rental_barcode_image' => 'nullable|image',
             'tenant_nationality' => 'required|max:191',
-            'with_tenant_nationality' => 'required|max:191',
             'insurance_value' => 'required|max:100000',
             'phonenumber' => 'required|min:8|max:15',
-            'car' => 'required|array'
+            'car' => 'required|array',
+            'companions' => 'required|array|min:1|max:' . config('contracts.companions.max'),
+            'companions.*.title' => 'required|in:wife,mother,sister,daughter,others',
+            'companions.*.name' => 'required|max:191',
+            'companions.*.id_number' => 'required|size:10',
+            'companions.*.nationality' => 'required|max:191',
+            'companions.*.barcode' => 'nullable|image',
         ]);
+
+        $multiSectorId = (int) config('contracts.companions.multi_sector_id');
+        if ((int) $request->sector_id !== $multiSectorId && count($request->companions) !== 1) {
+            return redirect()->back()
+                ->withInput($request->input())
+                ->withErrors(['companions' => 'يمكن إضافة أكثر من مرافق فقط للقطاع رقم ' . $multiSectorId . '.']);
+        }
 
         return DB::transaction(function () use ($request, $id){
             $contract = Contract::findOrFail($id);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ContractsResource;
 use App\Models\Car;
+use App\Models\ContractCompanion;
 use App\Models\contractService;
 use App\Models\History;
 use App\Models\Unit;
@@ -69,7 +70,13 @@ class contractsController extends Controller
             $q->where('valid_to', '')->orWhere('valid_to', '<', Carbon::today());
         })->where('type', 'investor')->where('user_id', auth()->id())->get();
 
-        return view('add-contract', compact('sectors', 'page_title', 'refused', 'expired'));
+        $companionsMax = config('contracts.companions.max');
+        $companionsMultiSectorId = config('contracts.companions.multi_sector_id');
+
+        return view('add-contract', compact(
+            'sectors', 'page_title', 'refused', 'expired',
+            'companionsMax', 'companionsMultiSectorId'
+        ));
     }
 
     private function filter($q)
@@ -222,17 +229,25 @@ class contractsController extends Controller
             'tenant_title' => 'required|max:191',
             'tenant_name' => 'required|max:191',
             'tenant_name_code' => 'required|size:10',
-            'with_tenant_title' => 'required|max:191',
-            'with_tenant_name' => 'required|max:191',
-            'with_tenant_name_code' => 'required|size:10',
             'rent_value' => 'required|numeric|max:1000000',
             'attachment_1' => 'nullable|image',
-            'attachment_2' => 'nullable|image',
             'tenant_nationality' => 'required|max:191',
-            'with_tenant_nationality' => 'required|max:191',
             'insurance_value' => 'required|numeric|max:1000000',
-            'car' => 'required|array'
+            'car' => 'required|array',
+            'companions' => 'required|array|min:1|max:' . config('contracts.companions.max'),
+            'companions.*.title' => 'required|in:wife,mother,sister,daughter,others',
+            'companions.*.name' => 'required|max:191',
+            'companions.*.id_number' => 'required|size:10',
+            'companions.*.nationality' => 'required|max:191',
+            'companions.*.barcode' => 'nullable|image',
         ]);
+
+        $multiSectorId = (int) config('contracts.companions.multi_sector_id');
+        if ((int) $request->sector_id !== $multiSectorId && count($request->companions) !== 1) {
+            return redirect()->back()
+                ->withInput($request->input())
+                ->withErrors(['companions' => 'يمكن إضافة أكثر من مرافق فقط للقطاع رقم ' . $multiSectorId . '.']);
+        }
 
         return DB::transaction(function () use ($request) {
 
@@ -249,6 +264,8 @@ class contractsController extends Controller
             $final_vat = $calculateFinalPrices['vat'];
             $final_total = $calculateFinalPrices['total'];
 
+            $firstCompanion = $request->companions[array_key_first($request->companions)];
+
             $data = [
                 'unit_id' => $request->unit_id,
                 'sector_id' => $request->sector_id,
@@ -259,10 +276,10 @@ class contractsController extends Controller
                 'tenant_name_code' => $request->tenant_name_code,
                 'tenant_nationality' => $request->tenant_nationality,
 
-                'with_tenant_title' => $request->with_tenant_title,
-                'with_tenant_name' => $request->with_tenant_name,
-                'with_tenant_name_code' => $request->with_tenant_name_code,
-                'with_tenant_nationality' => $request->with_tenant_nationality,
+                'with_tenant_title' => $firstCompanion['title'],
+                'with_tenant_name' => $firstCompanion['name'],
+                'with_tenant_name_code' => $firstCompanion['id_number'],
+                'with_tenant_nationality' => $firstCompanion['nationality'],
 
                 'insurance_value' => $request->insurance_value,
                 'rent_value' => $request->rent_value,
@@ -293,13 +310,6 @@ class contractsController extends Controller
                 $data['attachment_1'] = $filename_1;
             }
 
-            if ($request->has('attachment_2')) {
-                $file_2 = $request->file('attachment_2');
-                $filename_2 = Str::slug($file_2->getClientOriginalName()) . '-' . rand(1111, 9999) . '.' . $file_2->getClientOriginalExtension();
-                $file_2->move('uploads', $filename_2);
-                $data['attachment_2'] = $filename_2;
-            }
-
             if (!checkAvailability($data['from'], $data['to'], $request->unit_id)) {
                 return redirect()->back()
                     ->withInput($request->input())
@@ -326,6 +336,33 @@ class contractsController extends Controller
                 }
 
                 DB::table('cars')->insert($carArray);
+            }
+
+            // Companions (مرافق)
+            $sort = 0;
+            foreach ($request->companions as $key => $companion) {
+                $barcodeFilename = null;
+                if ($request->hasFile("companions.$key.barcode")) {
+                    $barcodeFile = $request->file("companions.$key.barcode");
+                    $barcodeFilename = Str::slug($barcodeFile->getClientOriginalName()) . '-' . rand(1111, 9999) . '.' . $barcodeFile->getClientOriginalExtension();
+                    $barcodeFile->move('uploads', $barcodeFilename);
+                }
+
+                ContractCompanion::create([
+                    'contract_id'   => $contract->id,
+                    'title'         => $companion['title'],
+                    'name'          => $companion['name'],
+                    'id_number'     => $companion['id_number'],
+                    'nationality'   => $companion['nationality'],
+                    'barcode_image' => $barcodeFilename,
+                    'sort_order'    => $sort,
+                ]);
+
+                if ($sort === 0 && $barcodeFilename) {
+                    $contract->attachment_2 = $barcodeFilename;
+                }
+
+                $sort++;
             }
 
             // Services
@@ -395,7 +432,7 @@ class contractsController extends Controller
 
     public function getSingleContract($code)
     {
-        $contract = Contract::with('unit', 'beach', 'sector', 'user', 'cars', 'services')->where('code', $code)->first();
+        $contract = Contract::with('unit', 'beach', 'sector', 'user', 'cars', 'companions', 'services')->where('code', $code)->first();
         return ContractsResource::make($contract);
     }
 
@@ -458,7 +495,7 @@ class contractsController extends Controller
 
     public function show($code)
     {
-        $contract = Contract::with('unit', 'beach', 'sector', 'user')->where('code', $code)->first();
+        $contract = Contract::with('unit', 'beach', 'sector', 'user', 'cars', 'companions', 'services')->where('code', $code)->first();
 
         if (is_null($contract))
             abort(404);
@@ -466,7 +503,7 @@ class contractsController extends Controller
         if (!$contract->status)
             return redirect()->to('contract/' . contractMix($contract) . '/draft-show');
 
-        return view('contracts.show');
+        return $this->renderContractView($contract);
     }
 
     public function check($code)
@@ -521,7 +558,7 @@ class contractsController extends Controller
 
     public function getByToken($code, $token)
     {
-        $contract = Contract::where('code', $code)->where('token', $token)->first();
+        $contract = Contract::with('unit', 'beach', 'sector', 'user', 'cars', 'companions', 'services')->where('code', $code)->where('token', $token)->first();
 
         if (is_null($contract))
             abort(404);
@@ -534,7 +571,60 @@ class contractsController extends Controller
         if ($check_reservation)
             return redirect()->to('contract/' . contractMix($contract) . '/pay-validate');
 
-        return view('contracts.show-guest', compact('contract'));
+        if (!$contract->status && !$contract->reservation_id) {
+            return view('contracts.show-guest', compact('contract'));
+        }
+
+        return $this->renderContractView($contract);
+    }
+
+    private function renderContractView($contract)
+    {
+        $settings = Setting::first();
+        $services = $contract->services ? unserialize($contract->services->service_data) : [];
+
+        $tenant_barcode = $this->getContractImage($contract->attachment_1);
+        $with_tenant_barcode = $this->getContractImage($contract->attachment_2);
+
+        $is_cancelled = (bool) $contract->is_cancelled;
+        $is_downpayment = false;
+        $is_reservation = !is_null($contract->reservation);
+        $remaining_payment = 0;
+
+        if (!is_null($contract->reservation_id)) {
+            $booking = \App\Models\Bookings::find($contract->reservation_id);
+            if ($booking && $booking->status < 4) {
+                $is_downpayment = true;
+            }
+            if ($booking) {
+                $remaining_payment = $booking->total - $booking->down_payment;
+            }
+        }
+
+        $upload_image_link = route('upload.invoice', deep_encode($contract->id, $contract->created_at));
+        $share_link = url('contract/' . $contract->code . '/' . $contract->token);
+        $qr_code_link = env('APP_URL') . '/contract/check/' . qr_code_encode($contract);
+        $tenant_title = trans('admin.' . $contract->tenant_title);
+        $with_tenant_title = trans('admin.' . $contract->with_tenant_title);
+
+        $beach_terms = $contract->beach ? $contract->beach->terms : collect();
+
+        return view('contracts.show-print', compact(
+            'contract', 'settings', 'services',
+            'tenant_barcode', 'with_tenant_barcode',
+            'is_cancelled', 'is_downpayment', 'is_reservation',
+            'remaining_payment', 'upload_image_link', 'share_link',
+            'qr_code_link', 'tenant_title', 'with_tenant_title',
+            'beach_terms'
+        ));
+    }
+
+    private function getContractImage($file_name)
+    {
+        if ($file_name && file_exists(public_path('uploads/' . $file_name))) {
+            return asset('uploads/' . $file_name);
+        }
+        return false;
     }
 
     public function cancelContract($code)

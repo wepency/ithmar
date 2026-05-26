@@ -235,6 +235,14 @@
                     12. قيمة العقد غير مستودة ولايمكن التعديل او تغيير العقد بعد إصدارة
                     لأي سبب كان .
                 </p>
+
+                <p class="point">
+                    13. خاص بتاجير الشباب الأحلام 6 اشخاص فقط (شباب) الحمراء 6 أشخاص فقط (شباب) المونتانا 3 أشخاص فقط (شباب) في حال لوحظ وجود أكثر من العدد المسموح يخصم 1000 ريال من التأمين.
+                </p>
+
+                <p class="point" v-if="unitInfo.sectorNumber == 5">
+                    14. في حالة الافتراش او السباحة خارج الموقع المؤجر يتم خصم كامل مبلغ التأمين.
+                </p>
             </div>
 
             <div class="section-three">
@@ -319,15 +327,15 @@
 </template>
 
 <script>
-import print from "vue-print-nb";
+import print from "vue3-print-nb";
 import QrcodeVue from "qrcode.vue";
 import axios from 'axios'
 
-directives: {
-    print;
-}
 export default {
     name: "Contract",
+    directives: {
+        print
+    },
     data() {
         return {
             url: '',

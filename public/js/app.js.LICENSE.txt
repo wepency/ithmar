@@ -1,18 +1,44 @@
 /*!
- * Vue.js v2.7.16
- * (c) 2014-2023 Evan You
- * Released under the MIT License.
+ * Pusher JavaScript Library v8.4.0
+ * https://pusher.com/
+ *
+ * Copyright 2020, Pusher
+ * Released under the MIT licence.
  */
 
 /*!
- * qrcode.vue v1.7.0
- * A Vue component to generate QRCode.
- * © 2017-2019 @scopewu(https://github.com/scopewu)
+ * qrcode.vue v3.8.0
+ * A Vue.js component to generate QRCode. Both support Vue 2 and Vue 3
+ * © 2017-PRESENT @scopewu(https://github.com/scopewu)
  * MIT License.
  */
 
 /*!
- * vuex v3.6.2
- * (c) 2021 Evan You
+ * vue-router v4.6.4
+ * (c) 2025 Eduardo San Martin Morote
  * @license MIT
  */
+
+/*!
+ * vuex v4.1.0
+ * (c) 2022 Evan You
+ * @license MIT
+ */
+
+/**
+* @vue/runtime-core v3.5.30
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+
+/**
+* @vue/runtime-dom v3.5.30
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+
+/**
+* @vue/shared v3.5.30
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/

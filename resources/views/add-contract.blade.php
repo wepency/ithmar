@@ -11,6 +11,122 @@
     <link rel="stylesheet" href="{{asset('css/cropper.min.css')}}">
     <link rel="stylesheet" href="{{asset('css/bootstrap-datepicker.min.css') }}">
     <link rel="stylesheet" href="{{asset('css/contract.css')}}" />
+    <style>
+        .companion-card {
+            position: relative;
+            background: #ffffff;
+            border: 1px solid #eef1f5;
+            border-radius: 18px;
+            padding: 28px 28px 18px;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 18px rgba(23, 43, 77, 0.06);
+            transition: box-shadow .2s ease, transform .2s ease;
+        }
+        .companion-card:hover { box-shadow: 0 8px 28px rgba(23, 43, 77, 0.09); }
+        .companion-card__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px dashed #e6ecf3;
+        }
+        .companion-card__title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2d3d;
+            margin: 0;
+        }
+        .companion-card__badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd36a, #f6a623);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 3px 8px rgba(246, 166, 35, 0.35);
+        }
+        .companion-remove {
+            background: transparent;
+            border: 1px solid #f3d2d2;
+            color: #c0392b;
+            border-radius: 10px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s ease, color .15s ease;
+        }
+        .companion-remove:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
+        .companion-barcode {
+            border: 2px dashed #d5dce6;
+            border-radius: 14px;
+            padding: 18px;
+            background: #fbfcfe;
+            text-align: center;
+            transition: border-color .15s ease, background .15s ease;
+        }
+        .companion-barcode:hover { border-color: #f6a623; background: #fff8ea; }
+        .companion-barcode .upload-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 3px 10px rgba(23, 43, 77, 0.08);
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: transform .15s ease;
+        }
+        .companion-barcode .upload-button:hover { transform: translateY(-2px); }
+        .companion-barcode .upload-button img { width: 34px; height: auto; }
+        .companion-barcode .upload-hint { color: #7b8794; font-size: 13px; margin: 0; }
+        .companion-barcode .preview-img {
+            display: none;
+            max-width: 180px;
+            max-height: 120px;
+            margin-top: 10px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(23, 43, 77, 0.1);
+        }
+        .companion-barcode .preview-img.has-image { display: inline-block; }
+        .companion-barcode input[type="file"] { display: none; }
+        .btn-add-companion {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 22px;
+            border-radius: 14px;
+            border: 2px dashed #f6a623;
+            background: #fff8ea;
+            color: #b3781a;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background .15s ease, transform .1s ease;
+        }
+        .btn-add-companion:hover { background: #ffe8bf; transform: translateY(-1px); }
+        .btn-add-companion .plus-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: #f6a623;
+            color: #fff;
+            font-size: 16px;
+            line-height: 1;
+        }
+        .companions-hint { color: #7b8794; font-size: 12px; margin: 8px 0 0; }
+    </style>
 {{--    <script src="https://www.google.com/recaptcha/api.js"></script>--}}
 @endsection
 
@@ -318,96 +434,15 @@
                                 <div class="step" data-step="4">
                                     <h3 class="form-title"><span class="form-ribbon">4. بيانات المرافق</span></h3>
 
-                                    <div class="row">
-                                        <div class="col-md-6 col-xs-12">
-                                            <div class="form-group">
-                                                <div class="form-inline">
-                                                    <label for="with_tenant_title" class="form-label">بيانات المرافق</label>
-                                                </div>
+                                    <div id="companions-wrapper"></div>
 
-                                                <div class="radio-buttons large-wrapper">
-                                                    <input id="wife" type="radio" name="with_tenant_title" value="wife" checked />
-                                                    <label for="wife">زوج/ة</label>
-                                                    <input id="mother" type="radio" name="with_tenant_title" value="mother" />
-                                                    <label for="mother">والد/ة</label>
-                                                    <input id="sister" type="radio" name="with_tenant_title" value="sister" />
-                                                    <label for="sister">أخ/أخت</label>
-                                                    <input id="daughter" type="radio" name="with_tenant_title" value="daughter" />
-                                                    <label for="daughter">ابن/ة</label>
-                                                    <input id="others" type="radio" name="with_tenant_title" value="others" />
-                                                    <label for="others">أخرى</label>
-                                                </div>
-                                                {{--                                        <label for="with_tenant_name">اسم المرافق</label>--}}
-
-                                                <div class="form-control-container">
-                                                    <input type="text" data-max-size="191" maxlength="191" class="form-control grey @error('with_tenant_name') has-error @enderror" value="{{old('with_tenant_name')}}" id="with_tenant_name" name="with_tenant_name" required />
-                                                    <i></i>
-                                                </div>
-
-                                                <div class="text-danger @error('with_tenant_name') active @enderror">
-                                                    @error('with_tenant_name')
-                                                    {{ $message }}
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6 flex-end col-xs-12">
-                                            <div class="form-group">
-                                                <label for="with_tenant_name_code">رقم الهوية</label>
-
-                                                <div class="form-control-container">
-                                                    <input type="text" maxlength="10" class="form-control grey @error('with_tenant_name_code') has-error @enderror" value="{{old('with_tenant_name_code')}}" id="with_tenant_name_code" name="with_tenant_name_code" required />
-                                                    <i></i>
-                                                </div>
-
-                                                <div class="text-danger @error('with_tenant_name_code') active @enderror">
-                                                    @error('with_tenant_name_code')
-                                                    {{ $message }}
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6 col-xs-12">
-                                            <div class="form-group">
-                                                <label for="with_tenant_nationality">جنسية المرافق</label>
-
-                                                <div class="form-control-container">
-                                                    <input type="text" data-max-size="191" maxlength="191" class="form-control grey @error('with_tenant_nationality') has-error @enderror" value="{{old('with_tenant_nationality')}}" id="with_tenant_nationality" name="with_tenant_nationality" required />
-                                                    <i></i>
-                                                </div>
-
-                                                <div class="text-danger @error('with_tenant_nationality') active @enderror">
-                                                    @error('with_tenant_nationality')
-                                                    {{ $message }}
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-6 col-xs-12">
-                                            <div class="form-group">
-                                                <label for="attachment_2">باركود هوية المرافق (إختياري)</label>
-                                                <input type="file" data-barcode-image="with-rental-barcode-image" data-barcode-input="with-rental-barcode-image-input" class="form-control single-file-upload @error('attachment_2') has-error @enderror" accept="image/*" value="{{old('attachment_2')}}" id="attachment_2" name="attachment_2" />
-
-                                                <div class="uploaded-image">
-                                                    <label class="upload-button" for="attachment_2"><img src="{{asset('images/icons/computing-cloud.svg')}}" alt="upload-image" style="width: 50px;height: auto" /></label>
-
-                                                    <div class="uploaded-image-wrapper">
-                                                        <img src="" alt="" id="with-rental-barcode-image" />
-                                                        <input type="hidden" name="with_rental_barcode_image" id="with-rental-barcode-image-input" />
-                                                    </div>
-                                                </div>
-
-                                                <div class="text-danger @error('attachment_2') active @enderror">
-                                                    @error('attachment_2')
-                                                    {{ $message }}
-                                                    @enderror
-                                                </div>
-                                            </div>
+                                    <div class="row companions-actions">
+                                        <div class="col-md-12 col-xs-12">
+                                            <button type="button" id="add-companion" class="btn-add-companion" style="display:none;">
+                                                <span class="plus-icon">+</span>
+                                                <span>إضافة مرافق</span>
+                                            </button>
+                                            <p class="companions-hint" id="companions-hint" style="display:none;">يمكنك إضافة حتى {{ $companionsMax }} مرافقين لهذا القطاع.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -853,5 +888,169 @@
         $('form').on('submit', function (e){
             $('#submit-form').attr('disabled', true)
         })
+
+        // Companions (مرافق) — dynamic rows, limits driven by config/contracts.php
+        const MAX_COMPANIONS = {{ (int) $companionsMax }};
+        const COMPANIONS_SECTOR = {{ (int) $companionsMultiSectorId }};
+
+        const COMPANION_ORDINALS = ['الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع', 'العاشر'];
+
+        function companionHeading(index){
+            return 'المرافق ' + (COMPANION_ORDINALS[index] || ('رقم ' + (index + 1)));
+        }
+
+        function renderCompanion(index, values){
+            values = values || {};
+            const title = (values.title && values.title !== '') ? values.title : 'wife';
+            const name = values.name ? String(values.name).replace(/"/g, '&quot;') : '';
+            const idNumber = values.id_number ? String(values.id_number).replace(/"/g, '&quot;') : '';
+            const nationality = values.nationality ? String(values.nationality).replace(/"/g, '&quot;') : '';
+            const prefix = 'companions['+index+']';
+            const removable = index > 0;
+            const heading = companionHeading(index);
+            const badge = index + 1;
+            const fileId = 'companion-barcode-file-'+index;
+            const imgId = 'companion-barcode-preview-'+index;
+            const checked = function(v){ return title === v ? ' checked' : ''; };
+
+            return '' +
+                '<div class="companion-card" data-companion-index="'+index+'">' +
+                    '<div class="companion-card__header">' +
+                        '<h4 class="companion-card__title"><span class="companion-card__badge">'+badge+'</span><span>'+heading+'</span></h4>' +
+                        (removable ? '<button type="button" class="companion-remove">× إزالة</button>' : '') +
+                    '</div>' +
+                    '<div class="row">' +
+                        '<div class="col-md-12 col-xs-12">' +
+                            '<div class="form-group">' +
+                                '<label class="form-label">صلة القرابة</label>' +
+                                '<div class="radio-buttons large-wrapper">' +
+                                    '<input id="title_wife_'+index+'" type="radio" name="'+prefix+'[title]" value="wife"'+checked('wife')+'><label for="title_wife_'+index+'">زوج/ة</label>' +
+                                    '<input id="title_mother_'+index+'" type="radio" name="'+prefix+'[title]" value="mother"'+checked('mother')+'><label for="title_mother_'+index+'">والد/ة</label>' +
+                                    '<input id="title_sister_'+index+'" type="radio" name="'+prefix+'[title]" value="sister"'+checked('sister')+'><label for="title_sister_'+index+'">أخ/أخت</label>' +
+                                    '<input id="title_daughter_'+index+'" type="radio" name="'+prefix+'[title]" value="daughter"'+checked('daughter')+'><label for="title_daughter_'+index+'">ابن/ة</label>' +
+                                    '<input id="title_others_'+index+'" type="radio" name="'+prefix+'[title]" value="others"'+checked('others')+'><label for="title_others_'+index+'">أخرى</label>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="row">' +
+                        '<div class="col-md-6 col-xs-12">' +
+                            '<div class="form-group">' +
+                                '<label class="form-label">اسم المرافق</label>' +
+                                '<div class="form-control-container"><input type="text" maxlength="191" class="form-control grey" placeholder="اسم المرافق" value="'+name+'" name="'+prefix+'[name]" required /><i></i></div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="col-md-6 col-xs-12">' +
+                            '<div class="form-group">' +
+                                '<label class="form-label">رقم الهوية</label>' +
+                                '<div class="form-control-container"><input type="text" maxlength="10" class="form-control grey" placeholder="10 أرقام" value="'+idNumber+'" name="'+prefix+'[id_number]" required /><i></i></div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="row">' +
+                        '<div class="col-md-6 col-xs-12">' +
+                            '<div class="form-group">' +
+                                '<label class="form-label">جنسية المرافق</label>' +
+                                '<div class="form-control-container"><input type="text" maxlength="191" class="form-control grey" placeholder="الجنسية" value="'+nationality+'" name="'+prefix+'[nationality]" required /><i></i></div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="col-md-6 col-xs-12">' +
+                            '<div class="form-group">' +
+                                '<label class="form-label">باركود هوية المرافق (إختياري)</label>' +
+                                '<div class="companion-barcode">' +
+                                    '<label class="upload-button" for="'+fileId+'"><img src="{{asset('images/icons/computing-cloud.svg')}}" alt="upload" /></label>' +
+                                    '<p class="upload-hint">اضغط لرفع صورة الباركود</p>' +
+                                    '<img id="'+imgId+'" class="preview-img" alt="preview" />' +
+                                    '<input type="file" id="'+fileId+'" class="companion-file-upload" data-preview="'+imgId+'" accept="image/*" name="'+prefix+'[barcode]" />' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        }
+
+        function reindexCompanions(){
+            $('#companions-wrapper .companion-card').each(function(newIndex){
+                $(this).attr('data-companion-index', newIndex);
+                $(this).find('.companion-card__badge').text(newIndex + 1);
+                $(this).find('.companion-card__title span:last-child').text(companionHeading(newIndex));
+                $(this).find('[name^="companions["]').each(function(){
+                    const name = $(this).attr('name');
+                    $(this).attr('name', name.replace(/companions\[\d+\]/, 'companions['+newIndex+']'));
+                });
+            });
+        }
+
+        function refreshCompanionControls(){
+            const sectorId = parseInt($('#sector').val(), 10);
+            const allowsMultiple = sectorId === COMPANIONS_SECTOR;
+            const count = $('#companions-wrapper .companion-card').length;
+
+            if (allowsMultiple && count < MAX_COMPANIONS) {
+                $('#add-companion').show();
+                $('#companions-hint').show();
+            } else {
+                $('#add-companion').hide();
+                $('#companions-hint').hide();
+            }
+
+            if (!allowsMultiple && count > 1) {
+                $('#companions-wrapper .companion-card').slice(1).remove();
+                reindexCompanions();
+            }
+        }
+
+        (function initCompanions(){
+            const oldCompanions = @json(old('companions', []));
+            const wrapper = $('#companions-wrapper');
+
+            if (Array.isArray(oldCompanions) && oldCompanions.length > 0) {
+                oldCompanions.forEach(function(values, i){
+                    wrapper.append(renderCompanion(i, values));
+                });
+            } else {
+                wrapper.append(renderCompanion(0, {
+                    title: @json(old('with_tenant_title', 'wife')),
+                    name: @json(old('with_tenant_name', '')),
+                    id_number: @json(old('with_tenant_name_code', '')),
+                    nationality: @json(old('with_tenant_nationality', ''))
+                }));
+            }
+
+            $('#companions-wrapper .companion-card').each(function(){
+                const card = $(this);
+                if (!card.find('input[type="radio"]:checked').length) {
+                    card.find('input[type="radio"][value="wife"]').prop('checked', true);
+                }
+            });
+
+            refreshCompanionControls();
+        })();
+
+        $('#sector').on('change', refreshCompanionControls);
+
+        $('#add-companion').on('click', function(){
+            const count = $('#companions-wrapper .companion-card').length;
+            if (count >= MAX_COMPANIONS) return;
+            $('#companions-wrapper').append(renderCompanion(count, {}));
+            $('#companions-wrapper .companion-card').last().find('input[type="radio"][value="wife"]').prop('checked', true);
+            refreshCompanionControls();
+        });
+
+        $('body').on('click', '.companion-remove', function(){
+            $(this).closest('.companion-card').remove();
+            reindexCompanions();
+            refreshCompanionControls();
+        });
+
+        $('body').on('change', '.companion-file-upload', function(){
+            const previewId = $(this).data('preview');
+            const preview = $('#'+previewId);
+            const file = this.files && this.files[0];
+            if (!file) { preview.removeClass('has-image').attr('src', ''); return; }
+            const reader = new FileReader();
+            reader.onload = function(e){ preview.attr('src', e.target.result).addClass('has-image'); };
+            reader.readAsDataURL(file);
+        });
     </script>
 @endsection
