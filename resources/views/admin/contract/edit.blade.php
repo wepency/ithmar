@@ -463,7 +463,7 @@ $tomorrow = $contract->exists ? $carbon->parse($contract->to)->format($format) :
                 @endif
             });
 
-            $.post('/api/get-villas/'+beach_id).done(function (data){
+            $.post('/api/get-villas-for-contract/'+beach_id).done(function (data){
                 for (let i=0;i<data.data.length;i++){
                     output += "<option value='"+data.data[i].id+"'>"+data.data[i].unit_number+"</option>"
                 }

@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
 use App\Models\Setting;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class contractsController extends Controller
 {
@@ -93,7 +94,7 @@ class contractsController extends Controller
         $request->validate([
             'sector_id' => 'required',
             'beach_id' => 'required',
-            'unit_id' => 'required',
+            'unit_id' => ['required', Rule::exists('units', 'id')->whereNull('is_terminated')],
             'tenant_name' => 'required',
             'tenant_name_code' => 'required|numeric|digits:10',
             'with_tenant_name' => 'required',
@@ -107,6 +108,8 @@ class contractsController extends Controller
             'with_tenant_nationality' => 'required',
             'insurance_value' => 'required|numeric|max:100000',
             'car' => 'required|array'
+        ], [
+            'unit_id.exists' => 'لا يمكن اختيار وحدة متوقفة.',
         ]);
 
         return DB::transaction(function () use ($request, $prices) {
@@ -223,7 +226,7 @@ class contractsController extends Controller
         $request->validate([
             'sector_id' => 'required',
             'beach_id' => 'required',
-            'unit_id' => 'required',
+            'unit_id' => ['required', Rule::exists('units', 'id')->whereNull('is_terminated')],
             'from' => 'required',
             'to' => 'required',
             'tenant_title' => 'required|max:191',
@@ -240,6 +243,8 @@ class contractsController extends Controller
             'companions.*.id_number' => 'required|size:10',
             'companions.*.nationality' => 'required|max:191',
             'companions.*.barcode' => 'nullable|image',
+        ], [
+            'unit_id.exists' => 'لا يمكن اختيار وحدة متوقفة.',
         ]);
 
         $multiSectorId = (int) config('contracts.companions.multi_sector_id');

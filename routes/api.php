@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('get-beaches/{sector_id}', 'API\beachesController@getBeaches');
 Route::post('get-villas/{beach_id}', 'API\unitsController@getVillas');
+Route::post('get-villas-for-contract/{beach_id}', 'API\unitsController@getVillasForContract');
 
 // Upload Unit Attachment
 Route::get('get-attachments/{id}', 'API\attachmentsController@index');

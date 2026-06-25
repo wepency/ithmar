@@ -22,6 +22,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ContractsController extends Controller
 {
@@ -144,7 +145,9 @@ class ContractsController extends Controller
         $contract = new Contract;
         $sectors  = Sector::get();
         $beaches  = Beach::where('sector_id', $contract->sector_id)->get();
-        $units    = Unit::where('beach_id', $contract->beach_id)->get();
+        $units    = Unit::where('beach_id', $contract->beach_id)
+            ->whereNull('is_terminated')
+            ->get();
         $companionsMax = config('contracts.companions.max');
         $companionsMultiSectorId = config('contracts.companions.multi_sector_id');
 
@@ -159,7 +162,7 @@ class ContractsController extends Controller
         $validate = [
             'sector_id' => 'required',
             'beach_id' => 'required',
-            'unit_id' => 'required',
+            'unit_id' => ['required', Rule::exists('units', 'id')->whereNull('is_terminated')],
             'from' => 'required',
             'to' => 'required',
             'tenant_name' => 'required|max:191',
@@ -178,7 +181,9 @@ class ContractsController extends Controller
             'companions.*.barcode' => 'nullable|image',
         ];
 
-        $request->validate($validate);
+        $request->validate($validate, [
+            'unit_id.exists' => 'لا يمكن اختيار وحدة متوقفة.',
+        ]);
 
         $multiSectorId = (int) config('contracts.companions.multi_sector_id');
         if ((int) $request->sector_id !== $multiSectorId && count($request->companions) !== 1) {
@@ -449,7 +454,12 @@ class ContractsController extends Controller
         $page_title = 'تعديل العقد '.$contract->code;
         $sectors  = Sector::get();
         $beaches  = Beach::where('sector_id', $contract->sector_id)->get();
-        $units    = Unit::where('beach_id', $contract->beach_id)->get();
+        $units    = Unit::where('beach_id', $contract->beach_id)
+            ->where(function ($q) use ($contract) {
+                $q->whereNull('is_terminated')
+                    ->orWhere('id', $contract->unit_id);
+            })
+            ->get();
         $companionsMax = config('contracts.companions.max');
         $companionsMultiSectorId = config('contracts.companions.multi_sector_id');
 
@@ -461,10 +471,14 @@ class ContractsController extends Controller
 
     public function update(Request $request, $id)
     {
+        $contract = Contract::findOrFail($id);
+
         $data = $request->validate([
             'sector_id' => 'required',
             'beach_id' => 'required',
-            'unit_id' => 'required',
+            'unit_id' => ['required', Rule::exists('units', 'id')->where(function ($q) use ($contract) {
+                $q->whereNull('is_terminated')->orWhere('id', $contract->unit_id);
+            })],
             'from' => 'required',
             'to' => 'required',
             'tenant_name' => 'required|max:191',
@@ -481,6 +495,8 @@ class ContractsController extends Controller
             'companions.*.id_number' => 'required|size:10',
             'companions.*.nationality' => 'required|max:191',
             'companions.*.barcode' => 'nullable|image',
+        ], [
+            'unit_id.exists' => 'لا يمكن اختيار وحدة متوقفة.',
         ]);
 
         $multiSectorId = (int) config('contracts.companions.multi_sector_id');
@@ -490,8 +506,7 @@ class ContractsController extends Controller
                 ->withErrors(['companions' => 'يمكن إضافة أكثر من مرافق فقط للقطاع رقم ' . $multiSectorId . '.']);
         }
 
-        return DB::transaction(function () use ($request, $id){
-            $contract = Contract::findOrFail($id);
+        return DB::transaction(function () use ($request, $contract){
             return $this->addOrCreate($contract, $request);
         });
     }

@@ -16,6 +16,15 @@ class unitsController extends Controller
         return UnitsResource::collection(Unit::where('beach_id', $id)->orderBy('unit_number', 'DESC')->get());
     }
 
+    public function getVillasForContract($id) {
+        return UnitsResource::collection(
+            Unit::where('beach_id', $id)
+                ->whereNull('is_terminated')
+                ->orderBy('unit_number', 'DESC')
+                ->get()
+        );
+    }
+
     public function getVillasForInvestor($id){
         return UnitsResource::collection(Unit::where('beach_id', $id)
             ->where('user_id', auth()->id())

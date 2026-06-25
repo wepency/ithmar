@@ -612,7 +612,11 @@
         function changeVillas(beach_id, element) {
             let output = '';
 
-            $.post('/api/get-villas/' + beach_id).done(function (data) {
+            const url = element === 'add_unit_id'
+                ? '/api/get-villas-for-contract/' + beach_id
+                : '/api/get-villas/' + beach_id;
+
+            $.post(url).done(function (data) {
                 output = "<option value=''></option>";
                 for (let i = 0; i < data.data.length; i++) {
                     output += "<option value='" + data.data[i].id + "'>" + data.data[i].unit_number + "</option>"
