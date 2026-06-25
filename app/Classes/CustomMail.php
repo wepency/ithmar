@@ -6,10 +6,6 @@ use Mailgun\Mailgun;
 
 trait CustomMail
 {
-    private $apiKey = '7698832daf4c5bd0dead0bb442e9424e-cac494aa-d8f79161';
-    private $endPoint = 'https://api.eu.mailgun.net';
-    private $alertFrom = 'alert@fpe-sa.com';
-
     private function CustomMail($user, $subject, $body){
         if (!is_null($user->email_verified_at)){
             if (preg_match('/(.*)@(live|hotmail)\.(.*)/', $user->email) != false) {
@@ -28,10 +24,10 @@ trait CustomMail
     }
 
     private function MailGun($user, $subject, $body){
-        $mg = Mailgun::create($this->apiKey, $this->endPoint);
+        $mg = Mailgun::create(config('services.mailgun.api_key'), config('services.mailgun.endpoint'));
 
-        $mg->messages()->send('fpe-sa.com', [
-            'from'    => $this->alertFrom,
+        $mg->messages()->send(config('services.mailgun.domain'), [
+            'from'    => config('services.mailgun.from'),
             'to'      => $user->email,
             'subject' => $subject,
             'html'    => view($body)->render()

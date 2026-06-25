@@ -327,7 +327,7 @@
                             <td class="cus-ceil"></td>
                             <td class="cus-ceil cus-padding">
                                 <qrcode-vue
-                                    :value="'https://www.fpe.sa/contracts/' + random"
+                                    :value="contractsUrl + '/contracts/' + random"
                                     size="100"
                                     level="H"
                                 />
@@ -397,6 +397,7 @@ export default {
                 f6: "5555555888899966 - عمر محمد محمود فودة",
             },
             random: "",
+            contractsUrl: process.env.MIX_CONTRACTS_URL || "https://ihost-homeksa.com",
             /* Print State Related */
             printLoading: true,
             printObj: {

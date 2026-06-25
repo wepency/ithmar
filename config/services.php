@@ -18,6 +18,12 @@ return [
         'domain' => env('MAILGUN_DOMAIN'),
         'secret' => env('MAILGUN_SECRET'),
         'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+        'api_key' => env('MAILGUN_API_KEY'),
+        'from' => env('MAILGUN_FROM'),
+    ],
+
+    'contracts' => [
+        'url' => env('CONTRACTS_URL', env('APP_URL')),
     ],
 
     'postmark' => [
