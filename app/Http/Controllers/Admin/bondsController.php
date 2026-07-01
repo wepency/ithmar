@@ -234,6 +234,7 @@ class bondsController extends Controller
         whereBetween('created_at', [$bond->from, $bond->to])
             ->where('sector_id', $bond->sector_id)
             ->where('status', 1)
+            ->whereNull('is_cancelled')
             ->where('is_accepted', 1)
             ->where(function ($q) {
                 $q->where('payment_type', 'paid')
