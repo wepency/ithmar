@@ -147,6 +147,8 @@ class ContractsController extends Controller
         $beaches  = Beach::where('sector_id', $contract->sector_id)->get();
         $units    = Unit::where('beach_id', $contract->beach_id)
             ->whereNull('is_terminated')
+            ->where('status', 1)
+            ->valid()
             ->get();
         $companionsMax = config('contracts.companions.max');
         $companionsMultiSectorId = config('contracts.companions.multi_sector_id');
@@ -162,7 +164,18 @@ class ContractsController extends Controller
         $validate = [
             'sector_id' => 'required',
             'beach_id' => 'required',
-            'unit_id' => ['required', Rule::exists('units', 'id')->whereNull('is_terminated')],
+            'unit_id' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $ok = \App\Models\Unit::whereKey($value)
+                        ->whereNull('is_terminated')
+                        ->valid()
+                        ->exists();
+                    if (! $ok) {
+                        $fail('لا يمكن اختيار وحدة غير سارية أو متوقفة.');
+                    }
+                },
+            ],
             'from' => 'required',
             'to' => 'required',
             'tenant_name' => 'required|max:191',
@@ -181,9 +194,7 @@ class ContractsController extends Controller
             'companions.*.barcode' => 'nullable|image',
         ];
 
-        $request->validate($validate, [
-            'unit_id.exists' => 'لا يمكن اختيار وحدة متوقفة.',
-        ]);
+        $request->validate($validate);
 
         $multiSectorId = (int) config('contracts.companions.multi_sector_id');
         if ((int) $request->sector_id !== $multiSectorId && count($request->companions) !== 1) {

@@ -94,7 +94,18 @@ class contractsController extends Controller
         $request->validate([
             'sector_id' => 'required',
             'beach_id' => 'required',
-            'unit_id' => ['required', Rule::exists('units', 'id')->whereNull('is_terminated')],
+            'unit_id' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $ok = \App\Models\Unit::whereKey($value)
+                        ->whereNull('is_terminated')
+                        ->valid()
+                        ->exists();
+                    if (! $ok) {
+                        $fail('لا يمكن اختيار وحدة غير سارية أو متوقفة.');
+                    }
+                },
+            ],
             'tenant_name' => 'required',
             'tenant_name_code' => 'required|numeric|digits:10',
             'with_tenant_name' => 'required',
@@ -108,8 +119,6 @@ class contractsController extends Controller
             'with_tenant_nationality' => 'required',
             'insurance_value' => 'required|numeric|max:100000',
             'car' => 'required|array'
-        ], [
-            'unit_id.exists' => 'لا يمكن اختيار وحدة متوقفة.',
         ]);
 
         return DB::transaction(function () use ($request, $prices) {
@@ -226,7 +235,18 @@ class contractsController extends Controller
         $request->validate([
             'sector_id' => 'required',
             'beach_id' => 'required',
-            'unit_id' => ['required', Rule::exists('units', 'id')->whereNull('is_terminated')],
+            'unit_id' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $ok = \App\Models\Unit::whereKey($value)
+                        ->whereNull('is_terminated')
+                        ->valid()
+                        ->exists();
+                    if (! $ok) {
+                        $fail('لا يمكن اختيار وحدة غير سارية أو متوقفة.');
+                    }
+                },
+            ],
             'from' => 'required',
             'to' => 'required',
             'tenant_title' => 'required|max:191',
@@ -243,8 +263,6 @@ class contractsController extends Controller
             'companions.*.id_number' => 'required|size:10',
             'companions.*.nationality' => 'required|max:191',
             'companions.*.barcode' => 'nullable|image',
-        ], [
-            'unit_id.exists' => 'لا يمكن اختيار وحدة متوقفة.',
         ]);
 
         $multiSectorId = (int) config('contracts.companions.multi_sector_id');

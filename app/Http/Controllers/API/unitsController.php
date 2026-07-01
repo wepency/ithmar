@@ -20,6 +20,8 @@ class unitsController extends Controller
         return UnitsResource::collection(
             Unit::where('beach_id', $id)
                 ->whereNull('is_terminated')
+                ->where('status', 1)
+                ->valid()
                 ->orderBy('unit_number', 'DESC')
                 ->get()
         );
