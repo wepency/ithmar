@@ -167,17 +167,7 @@ class bondsController extends Controller
 
     public function contracts($id){
         $bond = Bond::findOrFail($id);
-        $contracts = Contract::
-            whereBetween('created_at', [$bond->from, $bond->to])
-            ->where('sector_id', $bond->sector_id)
-            ->where('status', 1)
-            ->whereNull('is_cancelled')
-            ->where(function ($q) {
-                $q->where('payment_type', 'paid')
-                    ->orWhere('payment_type', 'pay_later');
-            })
-            // ->whereNotIn('payment_type', ['exempt', 'pay_later'])
-            ->where('is_accepted', 1);
+        $contracts = Contract::forBonds($bond->sector_id, $bond->from, $bond->to);
 
         $contracts_total = $contracts->sum('price');
 
@@ -230,16 +220,7 @@ class bondsController extends Controller
     {
         $bond = Bond::findOrFail($id);
 
-        $contracts = Contract::
-        whereBetween('created_at', [$bond->from, $bond->to])
-            ->where('sector_id', $bond->sector_id)
-            ->where('status', 1)
-            ->whereNull('is_cancelled')
-            ->where('is_accepted', 1)
-            ->where(function ($q) {
-                $q->where('payment_type', 'paid')
-                    ->orWhere('payment_type', 'pay_later');
-            });
+        $contracts = Contract::forBonds($bond->sector_id, $bond->from, $bond->to);
 
         $contracts_total = $contracts->sum('price');
         $contracts_count = $contracts->count();

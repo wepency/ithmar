@@ -72,6 +72,8 @@ class ReportsController extends Controller
             });
         }
 
+        $contracts = $contracts->listed($request->code);
+
         $sum = $contracts
                 ->ValidForReport()
                 ->where(function ($q) use ($request) {

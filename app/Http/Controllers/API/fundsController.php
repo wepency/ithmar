@@ -17,15 +17,7 @@ class fundsController extends Controller
         $to = Carbon::parse($request->to)->format('Y-m-d 23:59:59');
         $from = Carbon::parse($request->from)->format('Y-m-d 00:00:00');
 
-        $price_sum = Contract::where('sector_id', $sector_id)
-            ->ValidForReport()
-            ->where(function ($q) {
-                $q->where('payment_type', 'paid')
-                    ->orWhere('payment_type', 'pay_later');
-            })
-            ->where('is_accepted', 1)
-            ->whereNull('is_cancelled')
-            ->whereBetween('created_at', [$from, $to]);
+        $price_sum = Contract::forBonds($sector_id, $from, $to);
 
         return [
             'total' => number_format(($price_sum->sum('price') * $sector->percentage) / 100,2, '.', ''),

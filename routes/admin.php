@@ -27,6 +27,7 @@ Route::group(['prefix' => 'dashboard','as' => 'admin.', 'middleware' => 'FrontEn
       Route::put('contract/{contract_id}/changeStatus', 'Admin\ContractsController@changeStatus')->name('contract.changeStatus');
       Route::put('contract/{contract_id}/checkCode', 'Admin\ContractsController@checkCode');
       Route::post('contract/{contract_id}/resendCode', 'Admin\ContractsController@resendCode');
+      Route::put('contract/{id}/bonds/{status}', 'Admin\ContractsController@bondsVisibility')->name('contract.bondsVisibility');
       Route::put('contract/{id}/{cancel}', 'Admin\ContractsController@cancel');
       Route::get('contract/show/{code}', 'Admin\ContractsController@show');
       Route::get('contract/{id}/history', 'Admin\ContractsController@getHistory');

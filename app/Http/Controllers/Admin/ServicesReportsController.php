@@ -63,7 +63,7 @@ class ServicesReportsController extends Controller
 
         $sectors = Sector::orderby('sector_name', 'ASC')->get();
 
-        $rows = $rows->where('services_total', '>', '0')->whereHas('services')->valid()->orderby('id', 'DESC')->paginate();
+        $rows = $rows->listed($request->code)->where('services_total', '>', '0')->whereHas('services')->valid()->orderby('id', 'DESC')->paginate();
 
         return view('admin.reports.services.index',[
             'rows' => $rows,

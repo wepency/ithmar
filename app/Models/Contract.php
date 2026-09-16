@@ -40,6 +40,7 @@ class Contract extends Model
         'status',
         'is_accepted',
         'is_cancelled',
+        'excluded_from_bonds',
         'phonenumber',
         'payment_type',
         'reservation_id',
@@ -87,6 +88,31 @@ class Contract extends Model
 
     public function bond(){
         return $this->hasMany(InvestorBonds::class);
+    }
+
+    public function scopeForBonds($query, $sector_id, $from, $to){
+        $query->where('sector_id', $sector_id)
+            ->whereBetween('created_at', [$from, $to])
+            ->where('status', 1)
+            ->where('is_accepted', 1)
+            ->whereNull('is_cancelled')
+            ->whereNull('excluded_from_bonds')
+            ->where(function ($q) {
+                $q->where('payment_type', 'paid')
+                    ->orWhere('payment_type', 'pay_later');
+            });
+    }
+
+    public function scopeListed($query, $code = null){
+        // Contracts excluded from the bonds drop out of every listing; the only
+        // way back to one is searching for its code.
+        $query->where(function ($q) use ($code){
+            $q->whereNull('excluded_from_bonds');
+
+            if (filled($code)){
+                $q->orWhere('code', 'like', '%'.$code.'%');
+            }
+        });
     }
 
     public function scopeValid($query){

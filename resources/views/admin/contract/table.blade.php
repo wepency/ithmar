@@ -82,6 +82,10 @@
                             <span class="text text-danger">ملغي - </span>
                         @endif
 
+                        @if($row->excluded_from_bonds)
+                            <span class="text text-warning">مستبعد من السندات - </span>
+                        @endif
+
                         @if($row->payment_type)
                             {{trans('admin.'.$row->payment_type)}}
                         @else
@@ -111,6 +115,24 @@
                             @endif
                             <a class="btn btn-primary" href="{{admin_url('contract/'.$row->id.'/edit')}}"><i style="color: #fff" class="fa fa-edit"></i></a>
                         @endcan
+                    @endif
+
+                    @if(is_admin() && auth()->id() == 75)
+                        @if(is_null($row->excluded_from_bonds))
+                            <form onsubmit="return confirm('سيتم استبعاد العقد من جميع السندات وإعادة احتساب السندات المتأثرة. هل تريد المتابعة؟')" style="display: inline-block;margin: 0" action="{{admin_url('contract/'.$row->id.'/bonds/exclude')}}" method="POST">
+                                @csrf
+                                @method('PUT')
+
+                                <button class="btn btn-default" type="submit" data-toggle="tooltip" data-placement="top" title="استبعاد من السندات"><i class="fa fa-ban"></i></button>
+                            </form>
+                        @else
+                            <form onsubmit="return confirm('سيتم إرجاع العقد للسندات وإعادة احتساب السندات المتأثرة. هل تريد المتابعة؟')" style="display: inline-block;margin: 0" action="{{admin_url('contract/'.$row->id.'/bonds/include')}}" method="POST">
+                                @csrf
+                                @method('PUT')
+
+                                <button class="btn btn-info" type="submit" data-toggle="tooltip" data-placement="top" title="إرجاع للسندات"><i class="fa fa-undo"></i></button>
+                            </form>
+                        @endif
                     @endif
 
                     @if(is_admin() && (auth()->id() == 75 || auth()->id() == 23))

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Car;
+use App\Models\Bond;
 use App\Models\Contract;
 use App\Models\ContractCompanion;
 use App\Models\contractService;
@@ -120,7 +121,7 @@ class ContractsController extends Controller
             })->valid()->whereDate('to', $today);
         }
 
-        $rows = $rows->where('is_accepted', 1)->orderby('id', 'DESC')->paginate();
+        $rows = $rows->listed($request->code)->where('is_accepted', 1)->orderby('id', 'DESC')->paginate();
 
         if ($request->ajax()) {
             return response()->json([
@@ -541,6 +542,45 @@ class ContractsController extends Controller
         }
 
         return redirect()->back()->with('error', 'هناك مشكلة في إنشاء العقد ، برجاء المحاولة لاحقاََ.');
+    }
+
+    public function bondsVisibility(Request $request, $id, $status){
+        abort_unless(is_admin() && auth()->id() == 75, 403);
+
+        $contract = Contract::findOrFail($id);
+        $exclude = $status === 'exclude';
+
+        $bonds = DB::transaction(function () use ($contract, $exclude, $request){
+            $contract->update(['excluded_from_bonds' => $exclude ? 1 : null]);
+
+            History::create([
+                'hismodel_id' => $contract->id,
+                'hismodel_type' => 'App\Models\Contract',
+                'type' => $exclude ? 'excluded_from_bonds' : 'included_in_bonds',
+                'user_id' => auth()->id(),
+                'extra' => $request->reason
+            ]);
+
+            $bonds = Bond::coveringContract($contract);
+
+            foreach ($bonds as $bond){
+                $bond->recalculate();
+
+                History::create([
+                    'hismodel_id' => $bond->id,
+                    'hismodel_type' => 'App\Models\Bond',
+                    'type' => 'update',
+                    'user_id' => auth()->id(),
+                    'extra' => 'إعادة احتساب بعد ' . ($exclude ? 'استبعاد' : 'إرجاع') . ' العقد ' . $contract->code
+                ]);
+            }
+
+            return $bonds;
+        });
+
+        return redirect()->back()->with('message', $exclude
+            ? 'تم استبعاد العقد من السندات وإعادة احتساب ' . $bonds->count() . ' سند.'
+            : 'تم إرجاع العقد للسندات وإعادة احتساب ' . $bonds->count() . ' سند.');
     }
 
     public function changeStatus(Request $request, $contract_id) {

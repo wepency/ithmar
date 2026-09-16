@@ -20,7 +20,9 @@ class History
         'reject'     => 'رفض',
         'blocked'    => 'حظر',
         'unblocked'  => 'رفع الحظر',
-        'terminated' => 'شطب'
+        'terminated' => 'شطب',
+        'excluded_from_bonds' => 'استبعاد من السندات',
+        'included_in_bonds'  => 'إرجاع إلى السندات'
     ];
 
     protected $morph = [

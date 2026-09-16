@@ -39,25 +39,25 @@ class DashboardController extends Controller
 
         // حجوزات جديدة
 //        $ContractDayCount = Contract::where('created_at', '>', Carbon::parse('-24 hours'))
-        $ContractDayCount = Contract::whereBetween('created_at', [Carbon::today() , Carbon::tomorrow()->subMinute()])
+        $ContractDayCount = Contract::listed()->whereBetween('created_at', [Carbon::today() , Carbon::tomorrow()->subMinute()])
                     ->valid()
                     ->where(function ($q){
                         $this->filter($q);
                     })->count();
 
-              $contactEnterTodayCount = Contract::where(function ($q){
+              $contactEnterTodayCount = Contract::listed()->where(function ($q){
                   $this->filter($q);
               })->whereBetween('from', $EnterLeaveTimeRange)->where('status', 1)->count();
 
               // مغادرة اليوم
-              $contactLeaveTodayCount = Contract::where(function ($q){
+              $contactLeaveTodayCount = Contract::listed()->where(function ($q){
                   $this->filter($q);
               })->whereBetween('to', $EnterLeaveTimeRange)->valid()->count();
 //          }
       }else{
         $rows = Beach::where('sector_id', auth()->user()->role_id)->get();
 
-        $ContractDayCount = Contract::whereBetween('created_at', [Carbon::today() , Carbon::tomorrow()->subMinute()])
+        $ContractDayCount = Contract::listed()->whereBetween('created_at', [Carbon::today() , Carbon::tomorrow()->subMinute()])
                                         ->where('sector_id', auth()->user()->role_id)
                                         ->where(function ($q){
                                           $this->filter($q);
@@ -67,11 +67,11 @@ class DashboardController extends Controller
 //            $contactEnterTodayCount = 0;
 //            $contactLeaveTodayCount = 0;
 //        }else{
-            $contactEnterTodayCount = Contract::where(function ($q){
+            $contactEnterTodayCount = Contract::listed()->where(function ($q){
                 $this->filter($q);
             })->whereBetween('from', $EnterLeaveTimeRange)->where('sector_id', auth()->user()->role_id)->valid()->count();
 
-            $contactLeaveTodayCount = Contract::where(function ($q){
+            $contactLeaveTodayCount = Contract::listed()->where(function ($q){
                 $this->filter($q);
             })->where('sector_id', auth()->user()->role_id)->whereBetween('to', $EnterLeaveTimeRange)->where('sector_id', auth()->user()->role_id)->valid()->count();
 //        }
